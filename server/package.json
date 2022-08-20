@@ -1,11 +1,12 @@
 {
-  "name": "server",
+  "name": "amm-dex-xrpl-server",
   "version": "1.0.0",
   "description": "A REST API server that interacts with rippled and MongoDB for serving XRPL AMM requests/transactions",
   "main": "index.js",
   "scripts": {
     "build": "npx tsc",
-    "start": "node dist/index.js",
+    "start": "npm run build && node dist/index.js",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Omar Khan (khancode)",
@@ -20,6 +21,8 @@
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/node": "^18.7.8",
+    "concurrently": "^7.3.0",
+    "nodemon": "^2.0.19",
     "typescript": "^4.7.4"
   }
 }
