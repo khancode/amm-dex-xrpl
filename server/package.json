@@ -1,0 +1,15 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "A REST API server that interacts with rippled and MongoDB for serving client AMM requests/transactions on the XRPL",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Omar Khan (khancode)",
+  "license": "ISC",
+  "engines": {
+    "node": "16.17.0",
+    "npm": "8.18.0"
+  }
+}
