@@ -1,5 +1,5 @@
 # amm-dex-xrpl-server
-A REST API server that interacts with rippled and MongoDB for serving XRPL AMM requests/transactions.
+A REST API ⚡️ server that interacts with rippled and MongoDB for serving XRPL AMM requests/transactions.
 
 # Installation
 ```
