@@ -14,8 +14,9 @@ app.get('/', (req: Request, res: Response) => {
   res.send('TypeScript + Express server!')
 })
 
-app.get('/amm', (req: Request, res: Response) => {
-  res.json({ dat: 'amm' })
+app.get('/amm/:id', (req: Request, res: Response) => {
+  const ammId = req.params.id
+  res.json({ ammId })
 })
 
 app.post('/amm', (req: Request, res: Response) => {
