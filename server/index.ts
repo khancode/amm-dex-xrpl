@@ -14,6 +14,10 @@ app.get('/', (req: Request, res: Response) => {
   res.send('TypeScript + Express server!')
 })
 
+app.get('/amm', (req: Request, res: Response) => {
+  res.json({ dat: 'amm' })
+})
+
 app.post('/amm', (req: Request, res: Response) => {
   res.send('POST /amm success')
   console.log(req.body)
