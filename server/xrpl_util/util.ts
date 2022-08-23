@@ -1,6 +1,7 @@
 import fs from 'fs'
 import { Client, validate, xrpToDrops, Wallet } from 'xrpl'
 import { Amount } from 'xrpl/dist/npm/models/common'
+import { Transaction } from '../database/models/transaction'
 
 
 const GENESIS_ACCOUNT = "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"
@@ -61,6 +62,14 @@ async function sendPayment(wallet: Wallet, destination: string, amount: Amount, 
         `\t- ${walletAliasMap.get(wallet.address)} sending ${formatAmount} to ${walletAliasMap.get(destination)}\n` +
         `${JSON.stringify(paymentTx, null, 4)}\n\n`
     appendToFile(fileContent)
+
+    // Write to MongoDB
+    const txModel = new Transaction({
+        date: new Date(),
+        transactionType: paymentTx.TransactionType,
+        payload: paymentTx,
+    })
+    void txModel.save()
 
     return autofillAndSubmit(wallet, paymentTx)
 }
@@ -130,6 +139,14 @@ async function initTrustline(liquidityProviderWallet: Wallet, issuerWallet: Wall
         `${JSON.stringify(trustsetTx, null, 4)}\n\n`
     appendToFile(fileContent)
 
+    // Write to MongoDB
+    const txModel = new Transaction({
+        date: new Date(),
+        transactionType: trustsetTx.TransactionType,
+        payload: trustsetTx,
+    })
+    void txModel.save()
+
     return autofillAndSubmit(liquidityProviderWallet, trustsetTx)
 }
 
@@ -150,6 +167,14 @@ async function offerCreate(wallet: Wallet, takerGets: Amount, takerPays: Amount)
         `\t- ${walletAliasMap.get(wallet.address)} - taker gets ${formatTakerGets} pays ${formatTakerPays}\n` +
         `${JSON.stringify(offerCreateTx, null, 4)}\n\n`
     appendToFile(fileContent)
+
+    // Write to MongoDB
+    const txModel = new Transaction({
+        date: new Date(),
+        transactionType: offerCreateTx.TransactionType,
+        payload: offerCreateTx,
+    })
+    void txModel.save()
 
     return autofillAndSubmit(wallet, offerCreateTx)
 }
@@ -226,6 +251,14 @@ async function submitAmmInstanceCreate(liquidityProvider: Wallet, asset1: Amount
         `${JSON.stringify(ammInstanceCreateTx, null, 4)}\n\n`
     appendToFile(fileContent)
 
+    // Write to MongoDB
+    const txModel = new Transaction({
+        date: new Date(),
+        transactionType: ammInstanceCreateTx.TransactionType,
+        payload: ammInstanceCreateTx,
+    })
+    void txModel.save()
+
     return autofillAndSubmit(liquidityProvider, ammInstanceCreateTx)
 }
 
@@ -246,6 +279,14 @@ async function submitAmmDepositWithLPToken(liquidityProvider: Wallet, ammId: str
         `${JSON.stringify(ammDepositTx, null, 4)}\n\n`
     appendToFile(fileContent)
 
+    // Write to MongoDB
+    const txModel = new Transaction({
+        date: new Date(),
+        transactionType: ammDepositTx.TransactionType,
+        payload: ammDepositTx,
+    })
+    void txModel.save()
+
     return autofillAndSubmit(liquidityProvider, ammDepositTx)
 }
 
@@ -265,6 +306,14 @@ async function submitAmmDepositWithAsset1In(liquidityProvider: Wallet, ammId: st
         `\t- Asset1In: ${typeof asset1In === 'string' ? asset1In : JSON.stringify(asset1In, null, 4)}\n` +
         `${JSON.stringify(ammDepositTx, null, 4)}\n\n`
     appendToFile(fileContent)
+
+    // Write to MongoDB
+    const txModel = new Transaction({
+        date: new Date(),
+        transactionType: ammDepositTx.TransactionType,
+        payload: ammDepositTx,
+    })
+    void txModel.save()
 
     return autofillAndSubmit(liquidityProvider, ammDepositTx)
 }
@@ -287,6 +336,14 @@ async function submitAmmDepositWithAsset1InAndAsset2In(liquidityProvider: Wallet
         `\t- Asset2In: ${typeof asset2In === 'string' ? asset2In : JSON.stringify(asset2In, null, 4)}\n` +
         `${JSON.stringify(ammDepositTx, null, 4)}\n\n`
     appendToFile(fileContent)
+
+    // Write to MongoDB
+    const txModel = new Transaction({
+        date: new Date(),
+        transactionType: ammDepositTx.TransactionType,
+        payload: ammDepositTx,
+    })
+    void txModel.save()
 
     return autofillAndSubmit(liquidityProvider, ammDepositTx)
 }
