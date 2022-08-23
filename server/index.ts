@@ -4,6 +4,8 @@ import express from 'express'
 import type { Express, Request, Response } from 'express'
 import mongoose from 'mongoose'
 
+import routes from './routes'
+
 dotenv.config()
 const app: Express = express()
 const port = 3000
@@ -23,20 +25,7 @@ database.on('error', (error) => {
   console.log(error)
 })
 
-
-app.get('/', (req: Request, res: Response) => {
-  res.send('TypeScript + Express server!')
-})
-
-app.get('/amm/:id', (req: Request, res: Response) => {
-  const ammId = req.params.id
-  res.json({ ammId })
-})
-
-app.post('/amm', (req: Request, res: Response) => {
-  res.send('POST /amm success')
-  console.log(req.body)
-})
+app.use('/', routes)
 
 app.listen(port, () => {
   console.log(`⚡️ Server is running on localhost:${port}`)
