@@ -1,18 +1,39 @@
+import dotenv from 'dotenv'
 import fs from 'fs'
 import { Client, validate, xrpToDrops, Wallet } from 'xrpl'
 import { Amount } from 'xrpl/dist/npm/models/common'
 import { Transaction } from '../database/models/transaction'
 
+dotenv.config()
 
-const GENESIS_ACCOUNT = "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"
-const GENESIS_SECRET = "snoPBrXtMeMyMHUVTgbuqAfg1SUTb"
+const {
+    LOGS_DIR,
+    XRPL_SERVER,
+    GENESIS_ACCOUNT,
+    GENESIS_SECRET,
+} = process.env
+
+if (LOGS_DIR == undefined) {
+    throw Error(`LOGS_DIR env variable is undefined`)
+}
+if (XRPL_SERVER == undefined) {
+    throw Error(`XRPL_SERVER env variable is undefined`)
+}
+if (GENESIS_ACCOUNT == undefined) {
+    throw Error(`GENESIS_ACCOUNT env variable is undefined`)
+}
+if (GENESIS_SECRET == undefined) {
+    throw Error(`GENESIS_SECRET env variable is undefined`)
+}
+
+const LOG_FILEPATH = `${LOGS_DIR}/xrpl.txt`
+
 const GENESIS_WALLET = Wallet.fromSeed(GENESIS_SECRET)
 
 const walletAliasMap = new Map() // wallet address to alias map
 walletAliasMap.set(GENESIS_ACCOUNT, `GENESIS`)
 
-const MY_SERVER = "ws://localhost:6006/"
-const client = new Client(MY_SERVER)
+const client = new Client(XRPL_SERVER)
 
 
 async function connectClient() {
@@ -28,11 +49,14 @@ async function disconnectClient() {
 }
 
 function clearFile() {
-    fs.writeFileSync('logs/xrpl.txt', '')
+    fs.writeFileSync(LOG_FILEPATH, '')
 }
 
 function appendToFile(content: string) {
-    fs.appendFileSync('logs/xrpl.txt', content)
+    if (!fs.existsSync(LOGS_DIR as string)){
+        fs.mkdirSync(LOGS_DIR as string);
+    }    
+    fs.appendFileSync(LOG_FILEPATH, content)
     console.log(content)
 }
 
