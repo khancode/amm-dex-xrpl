@@ -1,7 +1,7 @@
 import bodyParser from 'body-parser'
 import dotenv from 'dotenv'
 import express from 'express'
-import type { Express, Request, Response } from 'express'
+import type { Express } from 'express'
 import mongoose from 'mongoose'
 
 import routes from './routes'
