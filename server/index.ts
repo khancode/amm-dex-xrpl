@@ -1,6 +1,10 @@
 import bodyParser from 'body-parser'
+import dotenv from 'dotenv'
 import express from 'express'
 import type { Express, Request, Response } from 'express'
+import mongoose from 'mongoose'
+
+dotenv.config()
 const app: Express = express()
 const port = 3000
 
@@ -8,6 +12,16 @@ const port = 3000
 app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json - the JSON payload sent by a REST client
 app.use(bodyParser.json())
+
+// Connects to MongoDB
+mongoose.connect(process.env.MONGODB_SERVER as string)
+const database = mongoose.connection
+database.once('connected', () => {
+  console.log('Database Connected')
+})
+database.on('error', (error) => {
+  console.log(error)
+})
 
 
 app.get('/', (req: Request, res: Response) => {
