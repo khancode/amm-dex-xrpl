@@ -1,7 +1,7 @@
 {
   "name": "amm-dex-xrpl-client",
   "version": "1.0.0",
-  "description": "An AMM-based DEX application that interacts with a REST API server",
+  "description": "A frontend client of an AMM-based DEX application",
   "main": "index.js",
   "scripts": {
     "build": "npx webpack --mode production",
