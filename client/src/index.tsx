@@ -6,6 +6,7 @@ import { Login } from './pages/Login'
 import { Swap } from './pages/Swap'
 import { Pool } from './pages/Pool'
 import { Charts } from './pages/Charts'
+import './index.scss'
 
 const container = document.getElementById('root')
 const root = createRoot(container!)
