@@ -1,11 +1,9 @@
 import React from 'react'
 
-export interface ChartsProps {}
-
-export const Charts = (props: ChartsProps) => {
-    return (
+export const Charts: React.FC<{}> = () => {
+  return (
         <div>
             <h1>Charts page!</h1>
         </div>
-    )
+  )
 }

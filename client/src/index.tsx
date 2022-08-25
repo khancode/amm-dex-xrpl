@@ -9,14 +9,17 @@ import { Charts } from './pages/Charts'
 import './index.scss'
 
 const container = document.getElementById('root')
-const root = createRoot(container!)
+if (container == null) {
+  throw Error('container is null')
+}
+const root = createRoot(container)
 root.render(
-    <BrowserRouter>
-        <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/swap" element={<Swap />} />
-            <Route path="/pool" element={<Pool />} />
-            <Route path="/charts" element={<Charts />} />
-        </Routes>
-    </BrowserRouter>
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/swap" element={<Swap />} />
+      <Route path="/pool" element={<Pool />} />
+      <Route path="/charts" element={<Charts />} />
+    </Routes>
+  </BrowserRouter>
 )
