@@ -1,7 +1,7 @@
 {
   "name": "amm-dex-xrpl-client",
   "version": "1.0.0",
-  "description": "A frontend client of an AMM-based DEX application",
+  "description": "A frontend web client of an AMM-based DEX application",
   "main": "index.js",
   "scripts": {
     "build": "npx webpack --mode production",
@@ -13,7 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.3.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.17",

@@ -1,5 +1,5 @@
 # amm-dex-xrpl-client
-A frontend client of an AMM-based DEX application.
+A frontend web client of an AMM-based DEX application.
 
 ## Installation
 ```
