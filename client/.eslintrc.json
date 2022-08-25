@@ -5,7 +5,8 @@
     },
     "extends": [
         "plugin:react/recommended",
-        "standard-with-typescript"
+        "standard-with-typescript",
+        "prettier"
     ],
     "overrides": [
     ],
@@ -18,9 +19,12 @@
         ]
     },
     "plugins": [
+        "prettier",
         "react"
     ],
     "rules": {
+        "prettier/prettier": "error",
+        "quotes": ["error", "backtick"]
     },
     "settings": {
         "react": {
