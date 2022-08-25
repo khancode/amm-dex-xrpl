@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'react'
 
 export interface LoginProps {}
 
@@ -7,5 +7,5 @@ export const Login = (props: LoginProps) => {
         <main>
             <h1>Login page!</h1>
         </main>
-    );
- };
+    )
+}

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'react'
 
 export interface PoolProps {}
 
@@ -7,5 +7,5 @@ export const Pool = (props: PoolProps) => {
         <div>
             <h1>Pool page!</h1>
         </div>
-    );
- };
+    )
+}

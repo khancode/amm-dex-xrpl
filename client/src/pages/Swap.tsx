@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'react'
 
 export interface SwapProps {}
 
@@ -7,5 +7,5 @@ export const Swap = (props: SwapProps) => {
         <div>
             <h1>Swap page!</h1>
         </div>
-    );
- };
+    )
+ }
