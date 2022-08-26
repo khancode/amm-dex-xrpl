@@ -1,4 +1,5 @@
 import bodyParser from 'body-parser'
+import cors from 'cors'
 import dotenv from 'dotenv'
 import express from 'express'
 import type { Express } from 'express'
@@ -11,6 +12,8 @@ const app: Express = express()
 const port = process.env.PORT || 3000
 
 connectDatabase()
+
+app.use(cors())
 
 // parse application/x-www-form-urlencoded - the default body type for forms
 app.use(bodyParser.urlencoded({ extended: false }))

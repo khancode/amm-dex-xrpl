@@ -24,7 +24,13 @@
     ],
     "rules": {
         "prettier/prettier": "error",
-        "quotes": ["error", "backtick"]
+        "quotes": ["error", "backtick"],
+        "@typescript-eslint/no-misused-promises": [
+            "error",
+            {
+                "checksVoidReturn": false
+            }
+        ]
     },
     "settings": {
         "react": {
