@@ -1,41 +1,35 @@
 {
-    "env": {
-        "browser": true,
-        "es2021": true
-    },
-    "extends": [
-        "plugin:react/recommended",
-        "standard-with-typescript",
-        "prettier"
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "plugin:react/recommended",
+    "standard-with-typescript",
+    "prettier"
+  ],
+  "overrides": [],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    // Enable linting rules with type information from our tsconfig
+    "project": ["./tsconfig.json"]
+  },
+  "plugins": ["prettier", "react"],
+  "rules": {
+    "prettier/prettier": "error",
+    "quotes": ["error", "backtick"],
+    "@typescript-eslint/no-misused-promises": [
+      "error",
+      {
+        "checksVoidReturn": false
+      }
     ],
-    "overrides": [
-    ],
-    "parserOptions": {
-        "ecmaVersion": "latest",
-        "sourceType": "module",
-        // Enable linting rules with type information from our tsconfig
-        "project":  [
-            "./tsconfig.json"
-        ]
-    },
-    "plugins": [
-        "prettier",
-        "react"
-    ],
-    "rules": {
-        "prettier/prettier": "error",
-        "quotes": ["error", "backtick"],
-        "@typescript-eslint/no-misused-promises": [
-            "error",
-            {
-                "checksVoidReturn": false
-            }
-        ],
-        "@typescript-eslint/no-floating-promises": "off"
-    },
-    "settings": {
-        "react": {
-            "version": "detect"
-        }
+    "@typescript-eslint/no-floating-promises": "off"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
     }
+  }
 }

@@ -4,7 +4,7 @@ export interface LoginResponse {
     _id: string
     username: string
     password: string
-    Wallet: {
+    wallet: {
       address: string
       seed: string
       _id: string
