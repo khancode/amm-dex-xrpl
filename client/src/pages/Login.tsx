@@ -1,7 +1,6 @@
-import axios from 'axios'
-import React, { FormEvent, useState } from 'react'
+import React, { FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { API_SERVER } from '../util/constants'
+// import { login } from '../util/apiRequests'
 
 import './Login.scss'
 
@@ -9,6 +8,12 @@ export const Login: React.FC<{}> = () => {
   const [username, setUsername] = useState(``)
   const [password, setPassword] = useState(``)
   const navigate = useNavigate()
+
+  // TODO: remove after login modal is implemented on /swap page
+  useEffect(() => {
+    // DEV: immediately redirect to /swap page until login modal is implemented
+    navigate(`/swap`)
+  })
 
   const handleSubmit: (
     event: FormEvent<HTMLFormElement>
@@ -18,16 +23,8 @@ export const Login: React.FC<{}> = () => {
     // 👇️ prevent page refresh
     event.preventDefault()
 
-    const response = await axios.post(`${API_SERVER}/login`, {
-      username,
-      password,
-    })
-    const result = response.data
-    if (!(`success` in result)) {
-      const error: string = result.error
-      alert(`Login failed: ${error}`)
-    }
-    navigate(`/swap`, { state: { user: result.user } })
+    // const response = await login(username, password)
+    // navigate(`/swap`, { state: { user: result.user } })
   }
 
   return (

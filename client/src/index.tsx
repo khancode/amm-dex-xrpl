@@ -16,10 +16,10 @@ const root = createRoot(container)
 root.render(
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<Login />} />
       <Route path="/swap" element={<Swap />} />
       <Route path="/pool" element={<Pool />} />
       <Route path="/charts" element={<Charts />} />
+      <Route path="*" element={<Login />} />
     </Routes>
   </BrowserRouter>
 )
