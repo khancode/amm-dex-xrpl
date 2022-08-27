@@ -31,5 +31,6 @@
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "ignorePatterns": ["global.d.ts"]
 }

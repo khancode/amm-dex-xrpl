@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { LoginResponse } from '../../util/apiModels'
 import { login } from '../../util/apiRequests'
 import { PASSWORD, USERNAME } from '../../util/constants'
+import XRPLogo from '../../../static/images/XRPLogo.png'
 import './Header.scss'
 
 const SCREENS = new Set<string>([`swap`, `pool`, `vote`, `charts`])
@@ -67,9 +68,10 @@ export const Header: React.FC<{}> = () => {
 
   return (
     <div className="header container">
-      <div className="row">
+      <div className="row headerRow">
         {/* TODO: XRPLswap logo */}
-        <div className="xrplSwapLogo col-3">XRPLswap logo</div>
+        <img src={XRPLogo} className="xrplSwapLogo col-1" />
+        {/* <div className="xrplSwapLogo col-3">XRPLswap logo</div> */}
 
         {/* TODO: replace with an actual navigation header */}
         <div className="col">{radioButtons()}</div>
@@ -78,9 +80,9 @@ export const Header: React.FC<{}> = () => {
         <div>{user != null && JSON.stringify(user, null, 4)}</div> */}
 
         {/* NIT: add user avatar and dropdown list for more options */}
-        <div className="userInfo col-3">
-          <p>{user?.user.username}</p>
-          <p>{user?.user.wallet.address}</p>
+        <div className="userInfo col-2">
+          <div>{user?.user.username}</div>
+          <div>{user?.user.wallet.address}</div>
         </div>
       </div>
     </div>

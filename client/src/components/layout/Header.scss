@@ -1,6 +1,10 @@
-.xrplSwapLogo {
-  display: flex;
-  justify-content: center;
+.header {
+  margin-top: 1%;
+  margin-bottom: 1%;
+}
+
+.headerRow {
+  align-items: center;
 }
 
 .screenRadios {
@@ -12,6 +16,5 @@
 .userInfo {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
 }
