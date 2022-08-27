@@ -1,16 +1,17 @@
+import axios from 'axios'
 import dotenv from 'dotenv'
 import fs from 'fs'
 import { Client, validate, xrpToDrops, Wallet } from 'xrpl'
 import { Amount } from 'xrpl/dist/npm/models/common'
 import { Transaction } from '../database/models/transaction'
+import { IUser } from '../database/models/user'
 
 dotenv.config()
 
 const {
     LOGS_DIR,
     XRPL_SERVER,
-    GENESIS_ACCOUNT,
-    GENESIS_SECRET,
+    AMM_DEVNET_FAUCET_SERVER,
 } = process.env
 
 if (LOGS_DIR == undefined) {
@@ -19,19 +20,13 @@ if (LOGS_DIR == undefined) {
 if (XRPL_SERVER == undefined) {
     throw Error(`XRPL_SERVER env variable is undefined`)
 }
-if (GENESIS_ACCOUNT == undefined) {
-    throw Error(`GENESIS_ACCOUNT env variable is undefined`)
-}
-if (GENESIS_SECRET == undefined) {
-    throw Error(`GENESIS_SECRET env variable is undefined`)
+if (AMM_DEVNET_FAUCET_SERVER == undefined) {
+    throw Error(`AMM_DEVNET_FAUCET_SERVER env variable is undefined`)
 }
 
 const LOG_FILEPATH = `${LOGS_DIR}/xrpl.txt`
 
-const GENESIS_WALLET = Wallet.fromSeed(GENESIS_SECRET)
-
 const walletAliasMap = new Map() // wallet address to alias map
-walletAliasMap.set(GENESIS_ACCOUNT, `GENESIS`)
 
 const client = new Client(XRPL_SERVER)
 
@@ -110,14 +105,27 @@ async function sendIOUPayment(wallet: Wallet, destination: string, currency: str
     )
 }
 
-async function fundWallet(wallet: Wallet, xrpAmount="1000") {
-    return sendPayment(GENESIS_WALLET, wallet.address, xrpToDrops(xrpAmount))
+interface FundWalletResponse {
+    account: {
+        xAddress: string
+        secret: string
+        classicAddress: string
+        address: string
+    }
+    amount: number // Default 10,000 XRP funded
+    balance: number
+}
+
+async function fundWallet(destination?: string): Promise<FundWalletResponse> {
+    const body = destination != null ? { destination }: null
+    const response = await axios.post(AMM_DEVNET_FAUCET_SERVER!, body)
+    return response.data
 }
 
 async function initWallet(alias: string): Promise<Wallet> {
-    const wallet = Wallet.generate()
+    const { account } = await fundWallet()
+    const wallet = Wallet.fromSecret(account.secret)
     walletAliasMap.set(wallet.address, alias)
-    await fundWallet(wallet)
     return wallet
 }
 
@@ -142,6 +150,44 @@ async function logBalances() {
         // Write to file
         appendToFile(fileContent)
     });
+}
+
+interface IUserBalance {
+    username: string
+    address: string
+    balances: {
+        currency: string
+        value: string
+    }[]
+}
+
+async function logBalancesWithIUserList(userList: IUser[]): Promise<IUserBalance[]> {
+    const promises: Promise<any>[] = []
+    for (const i in userList) {
+        const user = userList[i]
+        const { username, wallet } = user
+        promises.push(new Promise((resolve) => {
+            client.getBalances(user.wallet.address).then((balances) => {
+                resolve({ username, address: wallet.address, balances })
+            })
+        }))
+    }
+    
+    let balances: IUserBalance[] = []
+    await Promise.all(promises).then((values: IUserBalance[]) => {
+        balances = values
+        let fileContent = `Balances:\n`
+        for (const i in values) {
+            const { username, address, balances } = values[i]
+            fileContent += `\t- ${username}: ${address}\n`
+            fileContent += `\t\t${JSON.stringify(balances)}\n\n`
+        }
+
+        // Write to file
+        appendToFile(fileContent)
+    });
+
+    return balances
 }
 
 async function initTrustline(liquidityProviderWallet: Wallet, issuerWallet: Wallet, currency: string, limitAmountValue: string) {
@@ -380,8 +426,10 @@ export {
     clearFile,
     connectClient,
     disconnectClient,
+    fundWallet,
     initWallet,
     logBalances,
+    logBalancesWithIUserList,
     offerCreate,
     sendPayment,
     setupWalletsForAMM,
