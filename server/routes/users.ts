@@ -16,16 +16,17 @@ router.get('/balances', async (req: Request, res: Response) => {
     res.status(200).send(balances)
 })
 
-router.get('/:username', async (req: Request, res: Response) => {
+router.get('/balances/:username', async (req: Request, res: Response) => {
     const { username } = req.params
 
     const user: IUser|null = await User.findOne({ username })
-    
     if (user == null) {
         res.status(404).send({ error: `${username} not found`})
-    } else {
-        res.status(200).send(user)
+        return
     }
+
+    const balances = await logBalancesWithIUserList([user])
+    res.status(200).send(balances[0])
 })
 
 export default router

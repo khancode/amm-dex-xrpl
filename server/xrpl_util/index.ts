@@ -1,8 +1,64 @@
-import { connectClient, fundWallet, initWallet, logBalancesWithIUserList } from "./util";
+import { AMMInfoResponse, Wallet } from "xrpl";
+import { Amount, IssuedCurrencyAmount } from "xrpl/dist/npm/models/common";
+import {
+    ammInfoByAssets as ammInfoByAssetsUtil,
+    connectClient,
+    fundWallet,
+    initWallet,
+    logBalancesWithIUserList,
+    submitAmmInstanceCreate,
+} from "./util";
+
+const XRP = 'XRP'
 
 void connectClient()
 
+const convertToXRPLAsset = (asset: IssuedCurrencyAmount): Amount => {
+    return asset.currency === XRP ? asset.value : asset
+}
+
+interface AMMInstanceCreateResponse {
+    Account: string
+    Asset1: string
+    Asset2: string
+    TradingFee: number
+    Fee: string
+    Flags: number
+}
+
+const ammInstanceCreate = async (
+    seed: string,
+    asset1: IssuedCurrencyAmount,
+    asset2: IssuedCurrencyAmount,
+    tradingFee: number
+): Promise<AMMInstanceCreateResponse> => {
+    const liquidityProvider = Wallet.fromSeed(seed)
+    const xrplAsset1 = convertToXRPLAsset(asset1)
+    const xrplAsset2 = convertToXRPLAsset(asset2)
+    const response = await submitAmmInstanceCreate(liquidityProvider, xrplAsset1, xrplAsset2, tradingFee)
+    // @ts-ignore
+    const { Account, Asset1, Asset2, TradingFee, Flags } = response.result
+    return {
+        Account, 
+        Asset1, 
+        Asset2, 
+        TradingFee, 
+        // @ts-ignore
+        Flags: Flags!,
+    }
+}
+
+const ammInfoByAssets = async (
+    asset1: Amount,
+    asset2: Amount,
+): Promise<AMMInfoResponse> => {
+    const response = (await ammInfoByAssetsUtil(asset1, asset2)) as AMMInfoResponse
+    return response
+}
+
 export {
+    ammInstanceCreate,
+    ammInfoByAssets,
     fundWallet,
     initWallet,
     logBalancesWithIUserList,

@@ -11,3 +11,39 @@ export interface LoginResponse {
     }
   }
 }
+
+export interface UserBalancesResponse {
+  username: string
+  address: string
+  balances: [
+    {
+      currency: string
+      value: string
+      issuer?: string
+    }
+  ]
+}
+
+export interface CreatePoolResponse {
+  AMMAccount: string
+  AMMID: string
+  Asset1:
+    | string
+    | {
+        currency: string
+        issuer: string
+        value: string
+      }
+  Asset2:
+    | string
+    | {
+        currency: string
+        issuer: string
+        value: string
+      }
+  LPToken: {
+    currency: string
+    issuer: string
+    value: string
+  }
+}

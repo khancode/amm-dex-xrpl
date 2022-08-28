@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import './Login.scss'
 
 export const Login: React.FC<{}> = () => {
-  const [username, setUsername] = useState(``)
-  const [password, setPassword] = useState(``)
+  const [username, setUsername] = useState<string>(``)
+  const [password, setPassword] = useState<string>(``)
   const navigate = useNavigate()
 
   // TODO: remove after login modal is implemented on /swap page

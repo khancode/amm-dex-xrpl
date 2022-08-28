@@ -23,7 +23,7 @@ router.post('/', async (req: Request, res: Response) => {
                 seed: wallet.seed,
             },
         })
-        newUser.save()
+        await newUser.save()
         res.status(201).json({
             success: 'account created and login approved',
             user: newUser,

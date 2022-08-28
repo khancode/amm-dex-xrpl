@@ -1,9 +1,13 @@
-import React, { ChangeEvent, ReactElement, useEffect, useState } from 'react'
+import React, {
+  ChangeEvent,
+  ReactElement,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import { LoginResponse } from '../../util/apiModels'
-import { login } from '../../util/apiRequests'
-import { PASSWORD, USERNAME } from '../../util/constants'
+import { UserContext } from './Page'
 import XRPLogo from '../../../static/images/XRPLogo.png'
 import './Header.scss'
 
@@ -11,9 +15,9 @@ const SCREENS = new Set<string>([`swap`, `pool`, `vote`, `charts`])
 const DEFAULT_SCREEN = `swap`
 
 export const Header: React.FC<{}> = () => {
+  const { user } = useContext(UserContext)
   const location = useLocation()
   const navigate = useNavigate()
-  const [user, setUser] = useState<LoginResponse>()
   const [currentScreen, setCurrentScreen] = useState<string>()
 
   useEffect(() => {
@@ -23,12 +27,6 @@ export const Header: React.FC<{}> = () => {
         : location.pathname.substring(1)
     setCurrentScreen(getScreen)
   })
-
-  useEffect(() => {
-    login(USERNAME, PASSWORD).then((loginResponse) => {
-      setUser(loginResponse)
-    })
-  }, [])
 
   const createRadioButton = (screen: string): ReactElement => {
     const onChange = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -79,7 +77,7 @@ export const Header: React.FC<{}> = () => {
         {/* <div>user:</div>
         <div>{user != null && JSON.stringify(user, null, 4)}</div> */}
 
-        {/* NIT: add user avatar and dropdown list for more options */}
+        {/* NICE: add user avatar and dropdown list for more options */}
         <div className="userInfo col-2">
           <div>{user?.user.username}</div>
           <div>{user?.user.wallet.address}</div>

@@ -10,12 +10,33 @@ dotenv.config()
 
 const {
     LOGS_DIR,
+    LOCAL_XRPL_SERVER,
+    GENESIS_ACCOUNT,
+    GENESIS_SECRET,
     XRPL_SERVER,
     AMM_DEVNET_FAUCET_SERVER,
 } = process.env
 
+if (process.env.USE_LOCAL_XRPL == undefined) {
+    throw Error(`USE_LOCAL_XRPL env variable is undefined`)
+}
+const useLocalXrplLowercase = process.env.USE_LOCAL_XRPL?.toLowerCase()
+if (useLocalXrplLowercase !== 'true' && useLocalXrplLowercase !== 'false') {
+    throw Error(`USE_LOCAL_XRPL env variable must be a boolean value`)
+}
+const USE_LOCAL_XRPL = useLocalXrplLowercase === 'true'
+
 if (LOGS_DIR == undefined) {
     throw Error(`LOGS_DIR env variable is undefined`)
+}
+if (LOCAL_XRPL_SERVER == undefined) {
+    throw Error(`LOCAL_XRPL_SERVER env variable is undefined`)
+}
+if (GENESIS_ACCOUNT == undefined) {
+    throw Error(`GENESIS_ACCOUNT env variable is undefined`)
+}
+if (GENESIS_SECRET == undefined) {
+    throw Error(`GENESIS_SECRET env variable is undefined`)
 }
 if (XRPL_SERVER == undefined) {
     throw Error(`XRPL_SERVER env variable is undefined`)
@@ -28,19 +49,22 @@ const LOG_FILEPATH = `${LOGS_DIR}/xrpl.txt`
 
 const walletAliasMap = new Map() // wallet address to alias map
 
-const client = new Client(XRPL_SERVER)
+const client = new Client(USE_LOCAL_XRPL ? LOCAL_XRPL_SERVER : XRPL_SERVER)
 
+const GENESIS_WALLET = Wallet.fromSeed(GENESIS_SECRET)
 
 async function connectClient() {
-    console.log('XRPL connecting...')
+    const server = `${USE_LOCAL_XRPL ? 'Local' : 'AMMDevnet'} XRPL`
+    console.log(`${server} connecting...`)
     await client.connect()
-    console.log('XRPL Connected\n')
+    console.log(`${server} Connected\n`)
 }
 
 async function disconnectClient() {
-    console.log('XRPL disconnecting...')
+    const server = `${USE_LOCAL_XRPL ? 'Local' : 'AMMDevnet'} XRPL`
+    console.log(`${server} disconnecting...`)
     await client.disconnect()
-    console.log('XRPL Disconnected!')
+    console.log(`${server} Disconnected!`)
 }
 
 function clearFile() {
@@ -117,6 +141,20 @@ interface FundWalletResponse {
 }
 
 async function fundWallet(destination?: string): Promise<FundWalletResponse> {
+    if (USE_LOCAL_XRPL) {
+        const newWallet = Wallet.generate()
+        await sendPayment(GENESIS_WALLET, newWallet.address, xrpToDrops(10000))
+        return {
+            account: {
+                xAddress: newWallet.getXAddress(),
+                secret: newWallet.seed!,
+                classicAddress: newWallet.classicAddress,
+                address: newWallet.address,
+            },
+            amount: 10000,
+            balance: 10000,
+        }
+    }
     const body = destination != null ? { destination }: null
     const response = await axios.post(AMM_DEVNET_FAUCET_SERVER!, body)
     return response.data
@@ -249,18 +287,17 @@ async function offerCreate(wallet: Wallet, takerGets: Amount, takerPays: Amount)
     return autofillAndSubmit(wallet, offerCreateTx)
 }
 
-async function setupWalletsForAMM(gwAlias=`gateway`, lpAlias=`liquidityProvider`) {
+async function setupWalletsForAMM(gwAlias=`gateway`, lpAlias=`liquidityProvider`, currencies: string[]) {
     // 1. Init and fund gateway and liquidity provider with XRP
     const gateway = await initWallet(gwAlias)
     const liquidityProvider = await initWallet(lpAlias)
 
-    await logBalances()
-
-    // 2. Create Trustline and fund liquidity provider with issued currency
-    await initTrustline(liquidityProvider, gateway, 'USD', '5000')
-    await sendIOUPayment(gateway, liquidityProvider.address, 'USD', gateway, '1000')
-
-    await logBalances()
+    // 2. Create Trustline(s) and fund liquidity provider with issued currencies
+    for (const i in currencies) {
+        const currency = currencies[i]
+        await initTrustline(liquidityProvider, gateway, currency, '5000')
+        await sendIOUPayment(gateway, liquidityProvider.address, currency, gateway, '1000')
+    }
 
     return {
         gateway,
