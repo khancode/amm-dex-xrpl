@@ -2,6 +2,7 @@ import { AMMInfoResponse, Wallet } from "xrpl";
 import { Amount, IssuedCurrencyAmount } from "xrpl/dist/npm/models/common";
 import {
     ammInfoByAssets as ammInfoByAssetsUtil,
+    ammInfoById as ammInfoByIdUtil,
     connectClient,
     fundWallet,
     initWallet,
@@ -56,9 +57,17 @@ const ammInfoByAssets = async (
     return response
 }
 
+const ammInfoById = async (
+    amm_id: string,
+): Promise<AMMInfoResponse> => {
+    const response = (await ammInfoByIdUtil(amm_id)) as AMMInfoResponse
+    return response
+}
+
 export {
     ammInstanceCreate,
     ammInfoByAssets,
+    ammInfoById,
     fundWallet,
     initWallet,
     logBalancesWithIUserList,

@@ -2,12 +2,13 @@ import React, { useContext, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import { UserContext } from '../components/layout/Page'
 import { CreatePoolModal } from '../components/modals/CreatePoolModal'
-import { UserBalancesResponse } from '../util/apiModels'
-import { getUserBalances, createPool } from '../util/apiRequests'
+import { GetUserPoolsResponse, UserBalancesResponse } from '../util/apiModels'
+import { getUserBalances, createPool, getUserPools } from '../util/apiRequests'
 
 export const Pool: React.FC<{}> = () => {
   const { user, loading } = useContext(UserContext)
   const [userBalances, setUserBalances] = useState<UserBalancesResponse>()
+  const [userPools, setUserPools] = useState<GetUserPoolsResponse>([])
   const [showCreatePoolModal, setShowCreatePoolModal] = useState<boolean>(false) // DEV: set to true to immediately open modal
   const [showLoadingIndicator, setShowLoadingIndicator] =
     useState<boolean>(false)
@@ -16,6 +17,9 @@ export const Pool: React.FC<{}> = () => {
     if (!loading) {
       getUserBalances(user?.user.username).then((UserBalancesResponse) => {
         setUserBalances(UserBalancesResponse)
+      })
+      getUserPools(user?.user.username).then((getUserPoolsResponse) => {
+        setUserPools(getUserPoolsResponse)
       })
     }
   }, [loading])
@@ -47,10 +51,13 @@ export const Pool: React.FC<{}> = () => {
     setShowLoadingIndicator(true)
 
     createPool(user.user.username, asset1, asset2, tradingFee).then((pool) => {
-      getUserBalances(user?.user.username).then((UserBalancesResponse) => {
-        setUserBalances(UserBalancesResponse)
+      getUserBalances(user?.user.username).then((userBalancesResponse) => {
+        setUserBalances(userBalancesResponse)
         setShowLoadingIndicator(false)
         toggleCreatePoolModal()
+      })
+      getUserPools(user?.user.username).then((getUserPoolsResponse) => {
+        setUserPools(getUserPoolsResponse)
       })
     })
   }
@@ -68,6 +75,11 @@ export const Pool: React.FC<{}> = () => {
         showLoadingIndicator={showLoadingIndicator}
       />
       <h3>My Positions</h3>
+      <div>
+        {userPools.length === 0
+          ? `No active positions`
+          : JSON.stringify(userPools, null, 4)}
+      </div>
       <h3>Other Pools</h3>
     </div>
   )

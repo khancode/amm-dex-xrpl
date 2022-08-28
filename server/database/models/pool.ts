@@ -4,9 +4,18 @@ import { Amount } from 'xrpl/dist/npm/models/common'
 interface IPool {
   AMMAccount: string
   AMMID: string
-  Asset1: Amount
-  Asset2: Amount
-  LPToken: Amount
+  Asset1: string | {
+    currency: string
+    issuer: string
+  }
+  Asset2: string | {
+    currency: string
+    issuer: string
+  }
+  LPToken: {
+    currency: string
+    issuer: string
+  }
   TradingFee: number
   Flags: number
 }

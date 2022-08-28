@@ -196,6 +196,7 @@ interface IUserBalance {
     balances: {
         currency: string
         value: string
+        issuer?: string
     }[]
 }
 

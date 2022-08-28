@@ -47,3 +47,30 @@ export interface CreatePoolResponse {
     value: string
   }
 }
+
+export interface GetUserPoolsResponse
+  extends Array<{
+    _id: string
+    AMMAccount: string
+    AMMID: string
+    Asset1:
+      | string
+      | {
+          currency: string
+          issuer: string
+          value: string
+        }
+    Asset2:
+      | string
+      | {
+          currency: string
+          issuer: string
+          value: string
+        }
+    LPToken: {
+      currency: string
+      issuer: string
+      value: string
+    }
+    __v: number
+  }> {}

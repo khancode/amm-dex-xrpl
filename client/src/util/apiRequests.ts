@@ -3,6 +3,7 @@ import {
   UserBalancesResponse,
   LoginResponse,
   CreatePoolResponse,
+  GetUserPoolsResponse,
 } from './apiModels'
 
 const API_SERVER = `http://localhost:3000`
@@ -63,6 +64,24 @@ export async function createPool(
           reject(response.data.error)
         }
         resolve(response.data as CreatePoolResponse)
+      })
+      .catch((error) => {
+        throw new Error(error)
+      })
+  })
+}
+
+export async function getUserPools(
+  username: string
+): Promise<GetUserPoolsResponse> {
+  return await new Promise((resolve, reject) => {
+    axios
+      .get(`${API_POOLS_URL}/${username}`)
+      .then((response) => {
+        if (response.status < 200 || response.status > 299) {
+          reject(response.data.error)
+        }
+        resolve(response.data as GetUserPoolsResponse)
       })
       .catch((error) => {
         throw new Error(error)
