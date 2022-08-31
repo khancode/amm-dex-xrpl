@@ -21,7 +21,7 @@ export const step1_setupWalletsForAMM = async (): Promise<IUser[]> => {
   for (const i in USERS) {
     const { username, password, currencies } = USERS[i]
     const gatewayUsername = `gateway_${i}`
-    const { gateway, liquidityProvider } = await setupWalletsForAMM(`gateway_${i}`, username, currencies)
+    const { gateway, liquidityProvider } = await setupWalletsForAMM(gatewayUsername, username, currencies)
     const gatewayIUser = {
       username: gatewayUsername,
       password: gatewayUsername,

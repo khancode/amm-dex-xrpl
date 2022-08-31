@@ -193,11 +193,11 @@ async function logBalances() {
 interface IUserBalance {
     username: string
     address: string
-    balances: {
+    balances: Array<{
         currency: string
         value: string
         issuer?: string
-    }[]
+    }>
 }
 
 async function logBalancesWithIUserList(userList: IUser[]): Promise<IUserBalance[]> {
