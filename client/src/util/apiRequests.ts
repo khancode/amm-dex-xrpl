@@ -4,6 +4,7 @@ import {
   LoginResponse,
   CreatePoolResponse,
   GetUserPoolsBalancesResponse,
+  GetOtherPoolsBalancesResponse,
 } from './apiModels'
 
 const API_SERVER = `http://localhost:3000`
@@ -82,12 +83,36 @@ export async function getUserPoolsBalances(
 ): Promise<GetUserPoolsBalancesResponse> {
   return await new Promise((resolve, reject) => {
     axios
-      .get(`${API_POOLS_URL}/user/${username}`)
+      .get(`${API_POOLS_URL}/include/${username}`)
       .then((response) => {
         if (response.status < 200 || response.status > 299) {
           reject(response.data.error)
         }
         resolve(response.data as GetUserPoolsBalancesResponse)
+      })
+      .catch((error) => {
+        throw new Error(error)
+      })
+  })
+}
+
+/**
+ * Queries balances of all pools that a user has liquidity in.
+ * This should be called periodically to see latest pool(s) balance(s).
+ * @param AMMIDList
+ * @returns Promise<PoolsBalancesResponse>
+ */
+export async function getOtherPoolsBalances(
+  username: string
+): Promise<GetOtherPoolsBalancesResponse> {
+  return await new Promise((resolve, reject) => {
+    axios
+      .get(`${API_POOLS_URL}/exclude/${username}`)
+      .then((response) => {
+        if (response.status < 200 || response.status > 299) {
+          reject(response.data.error)
+        }
+        resolve(response.data as GetOtherPoolsBalancesResponse)
       })
       .catch((error) => {
         throw new Error(error)

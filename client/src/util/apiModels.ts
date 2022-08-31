@@ -75,3 +75,6 @@ export interface GetUserPoolsBalancesResponse
     ledger_current_index: number
     validated: boolean
   }> {}
+
+export interface GetOtherPoolsBalancesResponse
+  extends GetUserPoolsBalancesResponse {}

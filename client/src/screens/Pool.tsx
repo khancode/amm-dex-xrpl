@@ -4,6 +4,7 @@ import Button from 'react-bootstrap/Button'
 import { UserContext } from '../components/layout/Page'
 import { CreatePoolModal } from '../components/modals/CreatePoolModal'
 import {
+  GetOtherPoolsBalancesResponse,
   GetUserPoolsBalancesResponse,
   UserBalancesResponse,
 } from '../util/apiModels'
@@ -11,6 +12,7 @@ import {
   getUserBalances,
   createPool,
   getUserPoolsBalances,
+  getOtherPoolsBalances,
 } from '../util/apiRequests'
 
 export const Pool: React.FC<{}> = () => {
@@ -18,6 +20,8 @@ export const Pool: React.FC<{}> = () => {
   const [userBalances, setUserBalances] = useState<UserBalancesResponse>()
   const [userPoolsBalances, setUserPoolsBalances] =
     useState<GetUserPoolsBalancesResponse>([])
+  const [otherPoolsBalances, setOtherPoolsBalances] =
+    useState<GetOtherPoolsBalancesResponse>([])
   const [showCreatePoolModal, setShowCreatePoolModal] = useState<boolean>(false) // DEV: set to true to immediately open modal
   const [showLoadingIndicator, setShowLoadingIndicator] =
     useState<boolean>(false)
@@ -30,6 +34,11 @@ export const Pool: React.FC<{}> = () => {
       getUserPoolsBalances(user?.user.username).then(
         (getUserPoolsBalancesResponse) => {
           setUserPoolsBalances(getUserPoolsBalancesResponse)
+        }
+      )
+      getOtherPoolsBalances(user?.user.username).then(
+        (getOtherPoolsBalancesResponse) => {
+          setOtherPoolsBalances(getOtherPoolsBalancesResponse)
         }
       )
     }
@@ -72,6 +81,11 @@ export const Pool: React.FC<{}> = () => {
           setUserPoolsBalances(getUserPoolsBalancesResponse)
         }
       )
+      getOtherPoolsBalances(user?.user.username).then(
+        (getOtherPoolsBalancesResponse) => {
+          setOtherPoolsBalances(getOtherPoolsBalancesResponse)
+        }
+      )
     })
   }
 
@@ -91,13 +105,15 @@ export const Pool: React.FC<{}> = () => {
     })
   }
 
-  const myPositions = (): ReactElement | ReactElement[] => {
-    if (userPoolsBalances.length === 0) {
+  const showPools = (
+    poolsBalances: GetUserPoolsBalancesResponse | GetOtherPoolsBalancesResponse
+  ): ReactElement | ReactElement[] => {
+    if (poolsBalances.length === 0) {
       return <div>No active positions</div>
     }
 
-    return userPoolsBalances.map((userPoolBalance) => {
-      const { AMMID, Asset1, Asset2, LPToken } = userPoolBalance
+    return poolsBalances.map((poolBalance) => {
+      const { AMMID, Asset1, Asset2, LPToken } = poolBalance
       const asset1Currency =
         typeof Asset1 === `string` ? `XRP` : Asset1.currency
       const asset2Currency =
@@ -151,8 +167,9 @@ export const Pool: React.FC<{}> = () => {
         showLoadingIndicator={showLoadingIndicator}
       />
       <h3>My Positions</h3>
-      <div>{myPositions()}</div>
+      <div>{showPools(userPoolsBalances)}</div>
       <h3>Other Pools</h3>
+      <div>{showPools(otherPoolsBalances)}</div>
     </div>
   )
 }

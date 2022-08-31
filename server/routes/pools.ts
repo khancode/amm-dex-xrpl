@@ -68,7 +68,7 @@ router.get('/', async (req: Request, res: Response) => {
     res.status(200).send(pools)
 })
 
-router.get('/user/:username', async (req: Request, res: Response) => {
+router.get('/include/:username', async (req: Request, res: Response) => {
     const { username } = req.params
 
     const user: IUser|null = await User.findOne({ username })
@@ -89,6 +89,41 @@ router.get('/user/:username', async (req: Request, res: Response) => {
     }
 
     const pools = await Pool.find({ 'LPToken': { $in: currencyIssuerList } });
+
+    const AMMIDList = pools.map((pool) => pool.AMMID)
+
+    const promises = []
+    for (const i in AMMIDList) {
+        promises.push(ammInfoById(AMMIDList[i]))
+    }
+    
+    Promise.all(promises).then((ammInfoResponseList) => {
+        const result = ammInfoResponseList.map((ammInfoResponse) => ammInfoResponse.result)
+        res.status(200).send(result)
+    })
+})
+
+router.get('/exclude/:username', async (req: Request, res: Response) => {
+    const { username } = req.params
+
+    const user: IUser|null = await User.findOne({ username })
+    if (user == null) {
+        res.status(404).send({ error: `${username} not found`})
+        return
+    }
+
+    const userBalanceList = await logBalancesWithIUserList([user])
+    const { balances } = userBalanceList[0]
+    const currencyIssuerList = []
+    for (const i in balances) {
+        const { currency, issuer } = balances[i]
+        currencyIssuerList.push({
+            currency,
+            issuer
+        })
+    }
+
+    const pools = await Pool.find({ 'LPToken': { $nin: currencyIssuerList } });
 
     const AMMIDList = pools.map((pool) => pool.AMMID)
 
