@@ -1,4 +1,4 @@
-import { AMMInfoResponse, Wallet } from "xrpl";
+import { AMMInfoResponse, Wallet, xrpToDrops } from "xrpl";
 import { Amount, IssuedCurrencyAmount } from "xrpl/dist/npm/models/common";
 import {
     ammInfoByAssets as ammInfoByAssetsUtil,
@@ -15,7 +15,7 @@ const XRP = 'XRP'
 void connectClient()
 
 const convertToXRPLAsset = (asset: IssuedCurrencyAmount): Amount => {
-    return asset.currency === XRP ? asset.value : asset
+    return asset.currency === XRP ? xrpToDrops(asset.value) : asset
 }
 
 interface AMMInstanceCreateResponse {

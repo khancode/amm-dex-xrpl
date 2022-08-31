@@ -1,14 +1,23 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { ReactElement, useContext, useEffect, useState } from 'react'
+import { ProgressBar } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 import { UserContext } from '../components/layout/Page'
 import { CreatePoolModal } from '../components/modals/CreatePoolModal'
-import { GetUserPoolsResponse, UserBalancesResponse } from '../util/apiModels'
-import { getUserBalances, createPool, getUserPools } from '../util/apiRequests'
+import {
+  GetUserPoolsBalancesResponse,
+  UserBalancesResponse,
+} from '../util/apiModels'
+import {
+  getUserBalances,
+  createPool,
+  getUserPoolsBalances,
+} from '../util/apiRequests'
 
 export const Pool: React.FC<{}> = () => {
   const { user, loading } = useContext(UserContext)
   const [userBalances, setUserBalances] = useState<UserBalancesResponse>()
-  const [userPools, setUserPools] = useState<GetUserPoolsResponse>([])
+  const [userPoolsBalances, setUserPoolsBalances] =
+    useState<GetUserPoolsBalancesResponse>([])
   const [showCreatePoolModal, setShowCreatePoolModal] = useState<boolean>(false) // DEV: set to true to immediately open modal
   const [showLoadingIndicator, setShowLoadingIndicator] =
     useState<boolean>(false)
@@ -18,9 +27,11 @@ export const Pool: React.FC<{}> = () => {
       getUserBalances(user?.user.username).then((UserBalancesResponse) => {
         setUserBalances(UserBalancesResponse)
       })
-      getUserPools(user?.user.username).then((getUserPoolsResponse) => {
-        setUserPools(getUserPoolsResponse)
-      })
+      getUserPoolsBalances(user?.user.username).then(
+        (getUserPoolsBalancesResponse) => {
+          setUserPoolsBalances(getUserPoolsBalancesResponse)
+        }
+      )
     }
   }, [loading])
 
@@ -56,16 +67,81 @@ export const Pool: React.FC<{}> = () => {
         setShowLoadingIndicator(false)
         toggleCreatePoolModal()
       })
-      getUserPools(user?.user.username).then((getUserPoolsResponse) => {
-        setUserPools(getUserPoolsResponse)
-      })
+      getUserPoolsBalances(user?.user.username).then(
+        (getUserPoolsBalancesResponse) => {
+          setUserPoolsBalances(getUserPoolsBalancesResponse)
+        }
+      )
+    })
+  }
+
+  const myBalances = (): ReactElement | ReactElement[] => {
+    if (userBalances == null) {
+      return <div>No balances</div>
+    }
+
+    return userBalances.balances.map((userBalance) => {
+      const { currency, issuer, value } = userBalance
+      return (
+        <div key={`${currency}${issuer != null ? `_` + issuer : ``}`}>
+          <b>{`${currency} -> ${Number(value).toLocaleString()}`}</b>
+          {issuer != null && <div>{issuer}</div>}
+        </div>
+      )
+    })
+  }
+
+  const myPositions = (): ReactElement | ReactElement[] => {
+    if (userPoolsBalances.length === 0) {
+      return <div>No active positions</div>
+    }
+
+    return userPoolsBalances.map((userPoolBalance) => {
+      const { AMMID, Asset1, Asset2, LPToken } = userPoolBalance
+      const asset1Currency =
+        typeof Asset1 === `string` ? `XRP` : Asset1.currency
+      const asset2Currency =
+        typeof Asset2 === `string` ? `XRP` : Asset2.currency
+      const asset1Value = Number(
+        typeof Asset1 === `string` ? Number(Asset1) / 1000000 : Asset1.value
+      )
+      const asset2Value = Number(
+        typeof Asset2 === `string` ? Number(Asset2) / 1000000 : Asset2.value
+      )
+      const totalAssetsValue = asset1Value + asset2Value
+      const asset1Percentage = (asset1Value / totalAssetsValue) * 100
+      const asset2Percentage = (asset2Value / totalAssetsValue) * 100
+      const asset1Label = `${asset1Value.toLocaleString()} ${asset1Currency}`
+      const asset2Label = `${asset2Value.toLocaleString()} ${asset2Currency}`
+      const LPTokenDetails = `${Number(
+        LPToken.value
+      ).toLocaleString()} LPToken (${LPToken.currency})`
+      return (
+        <div key={AMMID}>
+          <div>{LPTokenDetails}</div>
+          <ProgressBar>
+            <ProgressBar
+              now={asset1Percentage}
+              label={asset1Label}
+              key={`${AMMID}_Asset1`}
+            />
+            <ProgressBar
+              variant="info"
+              now={asset2Percentage}
+              label={asset2Label}
+              key={`${AMMID}_Asset2`}
+            />
+          </ProgressBar>
+        </div>
+      )
     })
   }
 
   return (
     <div>
       <h1>Pool screen!</h1>
-      <p>Balances: {JSON.stringify(userBalances, null, 4)}</p>
+      <h3>Balances</h3>
+      <div>{myBalances()}</div>
       <Button onClick={toggleCreatePoolModal}>+ Create Pool</Button>
       <CreatePoolModal
         show={showCreatePoolModal}
@@ -75,11 +151,7 @@ export const Pool: React.FC<{}> = () => {
         showLoadingIndicator={showLoadingIndicator}
       />
       <h3>My Positions</h3>
-      <div>
-        {userPools.length === 0
-          ? `No active positions`
-          : JSON.stringify(userPools, null, 4)}
-      </div>
+      <div>{myPositions()}</div>
       <h3>Other Pools</h3>
     </div>
   )

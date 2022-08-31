@@ -48,9 +48,8 @@ export interface CreatePoolResponse {
   }
 }
 
-export interface GetUserPoolsResponse
+export interface GetUserPoolsBalancesResponse
   extends Array<{
-    _id: string
     AMMAccount: string
     AMMID: string
     Asset1:
@@ -72,5 +71,7 @@ export interface GetUserPoolsResponse
       issuer: string
       value: string
     }
-    __v: number
+    TradingFee: number
+    ledger_current_index: number
+    validated: boolean
   }> {}

@@ -6,7 +6,7 @@ const USERS = [
   {
     username: `khancode`,
     password: `khancode`,
-    currencies: [`ETH`],
+    currencies: [`ETH`, `USD`],
   }
 ]
 

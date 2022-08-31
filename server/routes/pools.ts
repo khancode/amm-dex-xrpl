@@ -1,7 +1,7 @@
 import express from 'express'
 import type { Router, Request, Response } from 'express'
 import { IUser, User } from '../database/models/user'
-import { ammInfoByAssets, ammInstanceCreate, logBalancesWithIUserList } from '../xrpl_util'
+import { ammInfoByAssets, ammInfoById, ammInstanceCreate, logBalancesWithIUserList } from '../xrpl_util'
 import { IPool, Pool } from '../database/models/pool'
 
 const router: Router = express.Router()
@@ -68,7 +68,7 @@ router.get('/', async (req: Request, res: Response) => {
     res.status(200).send(pools)
 })
 
-router.get('/:username', async (req: Request, res: Response) => {
+router.get('/user/:username', async (req: Request, res: Response) => {
     const { username } = req.params
 
     const user: IUser|null = await User.findOne({ username })
@@ -79,18 +79,28 @@ router.get('/:username', async (req: Request, res: Response) => {
 
     const userBalanceList = await logBalancesWithIUserList([user])
     const { balances } = userBalanceList[0]
-    const iouCurrencyIssuerList = []
+    const currencyIssuerList = []
     for (const i in balances) {
         const { currency, issuer } = balances[i]
-        iouCurrencyIssuerList.push({
+        currencyIssuerList.push({
             currency,
             issuer
         })
     }
 
-    const pools = await Pool.find({ 'LPToken': { $in: iouCurrencyIssuerList } });
+    const pools = await Pool.find({ 'LPToken': { $in: currencyIssuerList } });
 
-    res.status(200).send(pools)
+    const AMMIDList = pools.map((pool) => pool.AMMID)
+
+    const promises = []
+    for (const i in AMMIDList) {
+        promises.push(ammInfoById(AMMIDList[i]))
+    }
+    
+    Promise.all(promises).then((ammInfoResponseList) => {
+        const result = ammInfoResponseList.map((ammInfoResponse) => ammInfoResponse.result)
+        res.status(200).send(result)
+    })
 })
 
 router.post('/search/lptokencurrencyissuerlist', async (req: Request, res: Response) => {
