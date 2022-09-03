@@ -1,11 +1,15 @@
 import React, { ReactElement, useContext, useEffect, useState } from 'react'
-import { ProgressBar } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
+
 import { UserContext } from '../components/layout/Page'
+import { ChangeLiquidityModal } from '../components/modals/ChangeLiquidityModal'
 import { CreatePoolModal } from '../components/modals/CreatePoolModal'
+import { ShowPool } from '../components/ShowPool'
+import { AMMTransactionType, CurrencyIssuerValue } from '../types'
 import {
   GetOtherPoolsBalancesResponse,
   GetUserPoolsBalancesResponse,
+  PoolBalance,
   UserBalancesResponse,
 } from '../util/apiModels'
 import {
@@ -13,6 +17,8 @@ import {
   createPool,
   getUserPoolsBalances,
   getOtherPoolsBalances,
+  depositIntoPool,
+  withdrawFromPool,
 } from '../util/apiRequests'
 
 export const Pool: React.FC<{}> = () => {
@@ -22,7 +28,11 @@ export const Pool: React.FC<{}> = () => {
     useState<GetUserPoolsBalancesResponse>([])
   const [otherPoolsBalances, setOtherPoolsBalances] =
     useState<GetOtherPoolsBalancesResponse>([])
+  const [liquidityPoolSelected, setLiquidityPoolSelected] =
+    useState<PoolBalance>()
   const [showCreatePoolModal, setShowCreatePoolModal] = useState<boolean>(false) // DEV: set to true to immediately open modal
+  const [showChangeLiquidityModal, setShowChangeLiquidityModal] =
+    useState<boolean>(false) // DEV: set to true to immediately open modal
   const [showLoadingIndicator, setShowLoadingIndicator] =
     useState<boolean>(false)
 
@@ -46,6 +56,10 @@ export const Pool: React.FC<{}> = () => {
 
   const toggleCreatePoolModal = (): void => {
     setShowCreatePoolModal(!showCreatePoolModal)
+  }
+
+  const toggleChangeLiquidityModal = (): void => {
+    setShowChangeLiquidityModal(!showChangeLiquidityModal)
   }
 
   const onCreate = (
@@ -89,6 +103,69 @@ export const Pool: React.FC<{}> = () => {
     })
   }
 
+  const onSubmit = (
+    AMMID: string,
+    transactionType: AMMTransactionType,
+    LPToken: CurrencyIssuerValue | null,
+    Asset1: CurrencyIssuerValue | null,
+    Asset2: CurrencyIssuerValue | null,
+    EPriceValue: string
+  ): void => {
+    setShowLoadingIndicator(true)
+
+    if (transactionType === `deposit`) {
+      depositIntoPool(
+        user?.user.username,
+        AMMID,
+        LPToken!,
+        Asset1!,
+        Asset2!,
+        EPriceValue
+      ).then(() => {
+        getUserBalances(user?.user.username).then((userBalancesResponse) => {
+          setUserBalances(userBalancesResponse)
+          setShowLoadingIndicator(false)
+          toggleChangeLiquidityModal()
+        })
+        getUserPoolsBalances(user?.user.username).then(
+          (getUserPoolsBalancesResponse) => {
+            setUserPoolsBalances(getUserPoolsBalancesResponse)
+          }
+        )
+        getOtherPoolsBalances(user?.user.username).then(
+          (getOtherPoolsBalancesResponse) => {
+            setOtherPoolsBalances(getOtherPoolsBalancesResponse)
+          }
+        )
+      })
+    } else if (transactionType === `withdraw`) {
+      withdrawFromPool(
+        user?.user.username,
+        AMMID,
+        LPToken!,
+        Asset1!,
+        Asset2!,
+        EPriceValue
+      ).then(() => {
+        getUserBalances(user?.user.username).then((userBalancesResponse) => {
+          setUserBalances(userBalancesResponse)
+          setShowLoadingIndicator(false)
+          toggleChangeLiquidityModal()
+        })
+        getUserPoolsBalances(user?.user.username).then(
+          (getUserPoolsBalancesResponse) => {
+            setUserPoolsBalances(getUserPoolsBalancesResponse)
+          }
+        )
+        getOtherPoolsBalances(user?.user.username).then(
+          (getOtherPoolsBalancesResponse) => {
+            setOtherPoolsBalances(getOtherPoolsBalancesResponse)
+          }
+        )
+      })
+    }
+  }
+
   const myBalances = (): ReactElement | ReactElement[] => {
     if (userBalances == null) {
       return <div>No balances</div>
@@ -105,6 +182,11 @@ export const Pool: React.FC<{}> = () => {
     })
   }
 
+  const onPlusMinusLiquidityButtonClick = (poolBalance: PoolBalance): void => {
+    setLiquidityPoolSelected(poolBalance)
+    setShowChangeLiquidityModal(!showChangeLiquidityModal)
+  }
+
   const showPools = (
     poolsBalances: GetUserPoolsBalancesResponse | GetOtherPoolsBalancesResponse
   ): ReactElement | ReactElement[] => {
@@ -113,42 +195,12 @@ export const Pool: React.FC<{}> = () => {
     }
 
     return poolsBalances.map((poolBalance) => {
-      const { AMMID, Asset1, Asset2, LPToken } = poolBalance
-      const asset1Currency =
-        typeof Asset1 === `string` ? `XRP` : Asset1.currency
-      const asset2Currency =
-        typeof Asset2 === `string` ? `XRP` : Asset2.currency
-      const asset1Value = Number(
-        typeof Asset1 === `string` ? Number(Asset1) / 1000000 : Asset1.value
-      )
-      const asset2Value = Number(
-        typeof Asset2 === `string` ? Number(Asset2) / 1000000 : Asset2.value
-      )
-      const totalAssetsValue = asset1Value + asset2Value
-      const asset1Percentage = (asset1Value / totalAssetsValue) * 100
-      const asset2Percentage = (asset2Value / totalAssetsValue) * 100
-      const asset1Label = `${asset1Value.toLocaleString()} ${asset1Currency}`
-      const asset2Label = `${asset2Value.toLocaleString()} ${asset2Currency}`
-      const LPTokenDetails = `${Number(
-        LPToken.value
-      ).toLocaleString()} LPToken (${LPToken.currency})`
       return (
-        <div key={AMMID}>
-          <div>{LPTokenDetails}</div>
-          <ProgressBar>
-            <ProgressBar
-              now={asset1Percentage}
-              label={asset1Label}
-              key={`${AMMID}_Asset1`}
-            />
-            <ProgressBar
-              variant="info"
-              now={asset2Percentage}
-              label={asset2Label}
-              key={`${AMMID}_Asset2`}
-            />
-          </ProgressBar>
-        </div>
+        <ShowPool
+          key={poolBalance.AMMID}
+          poolBalance={poolBalance}
+          onPlusMinusLiquidityButtonClick={onPlusMinusLiquidityButtonClick}
+        />
       )
     })
   }
@@ -159,6 +211,12 @@ export const Pool: React.FC<{}> = () => {
       <h3>Balances</h3>
       <div>{myBalances()}</div>
       <Button onClick={toggleCreatePoolModal}>+ Create Pool</Button>
+      <h3>My Positions</h3>
+      <div>{showPools(userPoolsBalances)}</div>
+      <h3>Other Pools</h3>
+      <div>{showPools(otherPoolsBalances)}</div>
+
+      {/* All Modals used below: */}
       <CreatePoolModal
         show={showCreatePoolModal}
         userBalances={userBalances!}
@@ -166,10 +224,14 @@ export const Pool: React.FC<{}> = () => {
         onCreate={onCreate}
         showLoadingIndicator={showLoadingIndicator}
       />
-      <h3>My Positions</h3>
-      <div>{showPools(userPoolsBalances)}</div>
-      <h3>Other Pools</h3>
-      <div>{showPools(otherPoolsBalances)}</div>
+      <ChangeLiquidityModal
+        show={showChangeLiquidityModal}
+        userBalances={userBalances!}
+        onHide={toggleChangeLiquidityModal}
+        onSubmit={onSubmit}
+        showLoadingIndicator={showLoadingIndicator}
+        poolBalance={liquidityPoolSelected!}
+      />
     </div>
   )
 }

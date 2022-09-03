@@ -140,6 +140,7 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
                 <InputGroup.Text>Value</InputGroup.Text>
                 <Form.Control
                   type="number"
+                  min="0"
                   placeholder="value"
                   value={asset1Value}
                   onChange={(event) => setAsset1Value(event.target.value)}
@@ -171,6 +172,7 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
                 <InputGroup.Text>Value</InputGroup.Text>
                 <Form.Control
                   type="number"
+                  min="0"
                   placeholder="value"
                   value={asset2Value}
                   onChange={(event) => setAsset2Value(event.target.value)}
@@ -183,6 +185,7 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
                 <InputGroup.Text>Value</InputGroup.Text>
                 <Form.Control
                   type="number"
+                  min="0"
                   placeholder="value"
                   value={tradingFee}
                   onChange={(event) =>

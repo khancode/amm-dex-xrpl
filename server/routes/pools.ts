@@ -1,7 +1,7 @@
 import express from 'express'
 import type { Router, Request, Response } from 'express'
 import { IUser, User } from '../database/models/user'
-import { ammInfoByAssets, ammInfoById, ammInstanceCreate, logBalancesWithIUserList } from '../xrpl_util'
+import { ammDeposit, ammInfoByAssets, ammInfoById, ammInstanceCreate, ammWithdraw, logBalancesWithIUserList } from '../xrpl_util'
 import { IPool, Pool } from '../database/models/pool'
 
 const router: Router = express.Router()
@@ -94,12 +94,16 @@ router.get('/include/:username', async (req: Request, res: Response) => {
 
     const promises = []
     for (const i in AMMIDList) {
-        promises.push(ammInfoById(AMMIDList[i]))
+        const AMMID = AMMIDList[i]
+        promises.push(new Promise((resolve) => {
+            ammInfoById(AMMID).then((ammInfoResponse) => {
+                resolve({ ...ammInfoResponse.result, AMMID })
+            })
+        }))
     }
     
-    Promise.all(promises).then((ammInfoResponseList) => {
-        const result = ammInfoResponseList.map((ammInfoResponse) => ammInfoResponse.result)
-        res.status(200).send(result)
+    Promise.all(promises).then((ammInfoResultList) => {
+        res.status(200).send(ammInfoResultList)
     })
 })
 
@@ -129,13 +133,71 @@ router.get('/exclude/:username', async (req: Request, res: Response) => {
 
     const promises = []
     for (const i in AMMIDList) {
-        promises.push(ammInfoById(AMMIDList[i]))
+        const AMMID = AMMIDList[i]
+        promises.push(new Promise((resolve) => {
+            ammInfoById(AMMID).then((ammInfoResponse) => {
+                resolve({ ...ammInfoResponse.result, AMMID })
+            })
+        }))
     }
     
-    Promise.all(promises).then((ammInfoResponseList) => {
-        const result = ammInfoResponseList.map((ammInfoResponse) => ammInfoResponse.result)
-        res.status(200).send(result)
+    Promise.all(promises).then((ammInfoResultList) => {
+        res.status(200).send(ammInfoResultList)
     })
+})
+
+router.post('/deposit', async (req: Request, res: Response) => {
+    const { username, ammId, lptoken, asset1, asset2, epriceValue } = req.body
+
+    const user: IUser|null = await User.findOne({ username })
+    if (user == null) {
+        res.status(404).send({ error: `${username} not found`})
+        return
+    }
+
+    const result = await ammDeposit(
+        user.wallet.seed,
+        ammId,
+        lptoken,
+        asset1,
+        asset2,
+        epriceValue,
+    )
+
+    const txResult = result.meta.TransactionResult
+    if (txResult !== `tesSUCCESS`) {
+        res.status(404).send({ error: txResult })
+        return
+    }
+
+    res.status(201).send(result)
+})
+
+router.post('/withdraw', async (req: Request, res: Response) => {
+    const { username, ammId, lptoken, asset1, asset2, epriceValue } = req.body
+
+    const user: IUser|null = await User.findOne({ username })
+    if (user == null) {
+        res.status(404).send({ error: `${username} not found`})
+        return
+    }
+
+    const result = await ammWithdraw(
+        user.wallet.seed,
+        ammId,
+        lptoken,
+        asset1,
+        asset2,
+        epriceValue,
+    )
+
+    const txResult = result.meta.TransactionResult
+    if (txResult !== `tesSUCCESS`) {
+        res.status(404).send({ error: txResult })
+        return
+    }
+
+    res.status(201).send(result)
 })
 
 router.post('/search/lptokencurrencyissuerlist', async (req: Request, res: Response) => {

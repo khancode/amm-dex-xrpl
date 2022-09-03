@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { CurrencyIssuerValue } from '../types'
 import {
   UserBalancesResponse,
   LoginResponse,
@@ -113,6 +114,54 @@ export async function getOtherPoolsBalances(
           reject(response.data.error)
         }
         resolve(response.data as GetOtherPoolsBalancesResponse)
+      })
+      .catch((error) => {
+        throw new Error(error)
+      })
+  })
+}
+
+export async function depositIntoPool(
+  username: string,
+  ammId: string,
+  lptoken: CurrencyIssuerValue,
+  asset1: CurrencyIssuerValue,
+  asset2: CurrencyIssuerValue,
+  epriceValue: string
+): Promise<CreatePoolResponse> {
+  return await new Promise((resolve, reject) => {
+    const body = { username, ammId, lptoken, asset1, asset2, epriceValue }
+    axios
+      .post(`${API_POOLS_URL}/deposit`, body)
+      .then((response) => {
+        if (response.status < 200 || response.status > 299) {
+          reject(response.data.error)
+        }
+        resolve(response.data as CreatePoolResponse)
+      })
+      .catch((error) => {
+        throw new Error(error)
+      })
+  })
+}
+
+export async function withdrawFromPool(
+  username: string,
+  ammId: string,
+  lptoken?: CurrencyIssuerValue,
+  asset1?: CurrencyIssuerValue,
+  asset2?: CurrencyIssuerValue,
+  epriceValue?: string
+): Promise<CreatePoolResponse> {
+  return await new Promise((resolve, reject) => {
+    const body = { username, ammId, lptoken, asset1, asset2, epriceValue }
+    axios
+      .post(`${API_POOLS_URL}/withdraw`, body)
+      .then((response) => {
+        if (response.status < 200 || response.status > 299) {
+          reject(response.data.error)
+        }
+        resolve(response.data as CreatePoolResponse)
       })
       .catch((error) => {
         throw new Error(error)
