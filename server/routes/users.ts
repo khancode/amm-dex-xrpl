@@ -1,7 +1,7 @@
 import express from 'express'
 import type { Router, Request, Response } from 'express'
 import { IUser, User } from '../database/models/user'
-import { logBalancesWithIUserList } from '../xrpl_util'
+import { accountOffers, logBalancesWithIUserList } from '../xrpl_util'
 
 const router: Router = express.Router()
 
@@ -27,6 +27,19 @@ router.get('/balances/:username', async (req: Request, res: Response) => {
 
     const balances = await logBalancesWithIUserList([user])
     res.status(200).send(balances[0])
+})
+
+router.get('/offers/:username', async (req: Request, res: Response) => {
+    const { username } = req.params
+
+    const user: IUser|null = await User.findOne({ username })
+    if (user == null) {
+        res.status(404).send({ error: `${username} not found`})
+        return
+    }
+
+    const accountOffersResponse = await accountOffers(user.wallet.address)
+    res.status(200).send(accountOffersResponse)
 })
 
 export default router

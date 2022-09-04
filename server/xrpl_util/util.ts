@@ -1,7 +1,7 @@
 import axios from 'axios'
 import dotenv from 'dotenv'
 import fs from 'fs'
-import { Client, validate, xrpToDrops, Wallet } from 'xrpl'
+import { Client, validate, xrpToDrops, Wallet, OfferCreateFlags, AccountSetAsfFlags } from 'xrpl'
 import { Amount } from 'xrpl/dist/npm/models/common'
 import { Transaction } from '../database/models/transaction'
 import { IUser } from '../database/models/user'
@@ -85,7 +85,7 @@ async function autofillAndSubmit(wallet: Wallet, tx: any) {
     return client.submitAndWait(signed.tx_blob)
 }
 
-async function sendPayment(wallet: Wallet, destination: string, amount: Amount, sendMax=null) {
+async function sendPayment(wallet: Wallet, destination: string, amount: Amount, sendMax?: Amount) {
     const paymentTx = {
         TransactionType: 'Payment',
         Account: wallet.address,
@@ -265,6 +265,7 @@ async function offerCreate(wallet: Wallet, takerGets: Amount, takerPays: Amount)
         Account: wallet.address,
         TakerGets: takerGets,
         TakerPays: takerPays,
+        Flags: OfferCreateFlags.tfSell
     }
     validate(offerCreateTx)
 
@@ -286,6 +287,23 @@ async function offerCreate(wallet: Wallet, takerGets: Amount, takerPays: Amount)
     void txModel.save()
 
     return autofillAndSubmit(wallet, offerCreateTx)
+}
+
+async function accountOffers(account: string) {
+    const request = {
+        command: 'account_offers',
+        account,
+    }
+    const response = await client.request(request)
+
+    // Write to file
+    const fileContent =
+        `account_offers:\n` +
+        `\t- account: ${account}\n` +
+        `${JSON.stringify(response, null, 4)}\n\n`
+    appendToFile(fileContent)
+
+    return response
 }
 
 async function setupWalletsForAMM(gwAlias=`gateway`, lpAlias=`liquidityProvider`, currencies: string[]) {
@@ -456,7 +474,27 @@ async function submitAmmDepositWithAsset1InAndAsset2In(liquidityProvider: Wallet
     return autofillAndSubmit(liquidityProvider, ammDepositTx)
 }
 
+async function enableRippling(wallet: Wallet) {
+    const accountSet = {
+        TransactionType: 'AccountSet',
+        Account: wallet.address,
+        SetFlag: AccountSetAsfFlags.asfDefaultRipple,
+    }
+    validate(accountSet)
+
+    // Write to MongoDB
+    const txModel = new Transaction({
+        date: new Date(),
+        transactionType: accountSet.TransactionType,
+        payload: accountSet,
+    })
+    void txModel.save()
+
+    return autofillAndSubmit(wallet, accountSet)
+}
+
 export {
+    accountOffers,
     autofillAndSubmit,
     appendToFile,
     ammInfoByAssets,
@@ -464,12 +502,15 @@ export {
     clearFile,
     connectClient,
     disconnectClient,
+    enableRippling,
     fundWallet,
+    initTrustline,
     initWallet,
     logBalances,
     logBalancesWithIUserList,
     offerCreate,
     sendPayment,
+    sendIOUPayment,
     setupWalletsForAMM,
     submitAmmDepositWithLPToken,
     submitAmmDepositWithAsset1In,

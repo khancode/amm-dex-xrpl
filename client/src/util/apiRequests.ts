@@ -12,6 +12,7 @@ const API_SERVER = `http://localhost:3000`
 const API_LOGIN_URL = `${API_SERVER}/login`
 const API_USERS_URL = `${API_SERVER}/users`
 const API_POOLS_URL = `${API_SERVER}/pools`
+const API_SWAP_URL = `${API_SERVER}/swap`
 
 export async function login(
   username: string,
@@ -157,6 +158,27 @@ export async function withdrawFromPool(
     const body = { username, ammId, lptoken, asset1, asset2, epriceValue }
     axios
       .post(`${API_POOLS_URL}/withdraw`, body)
+      .then((response) => {
+        if (response.status < 200 || response.status > 299) {
+          reject(response.data.error)
+        }
+        resolve(response.data as CreatePoolResponse)
+      })
+      .catch((error) => {
+        throw new Error(error)
+      })
+  })
+}
+
+export async function swapAssets(
+  username: string,
+  swapAsset: CurrencyIssuerValue,
+  withAsset: CurrencyIssuerValue
+): Promise<CreatePoolResponse> {
+  return await new Promise((resolve, reject) => {
+    const body = { username, swapAsset, withAsset }
+    axios
+      .post(`${API_SWAP_URL}`, body)
       .then((response) => {
         if (response.status < 200 || response.status > 299) {
           reject(response.data.error)

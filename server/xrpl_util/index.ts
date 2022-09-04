@@ -1,7 +1,9 @@
+import { response } from "express";
 import { AMMInfoResponse, validate, Wallet, xrpToDrops } from "xrpl";
 import { Amount, IssuedCurrencyAmount } from "xrpl/dist/npm/models/common";
 import { Transaction } from "../database/models/transaction";
 import {
+    accountOffers as accountOffersUtil,
     ammInfoByAssets as ammInfoByAssetsUtil,
     ammInfoById as ammInfoByIdUtil,
     autofillAndSubmit,
@@ -9,6 +11,8 @@ import {
     fundWallet,
     initWallet,
     logBalancesWithIUserList,
+    offerCreate as offerCreateUtil,
+    sendPayment,
     submitAmmInstanceCreate,
 } from "./util";
 
@@ -68,6 +72,29 @@ interface AMMWithdrawResponse {
     Sequence: number
     SigningPubKey: string
     TransactionType: 'AMMDeposit'
+    TxnSignature: string
+    date: number
+    hash: string
+    inLedger: number
+    ledger_index: number
+    meta: {
+        AffectedNodes: [any],
+        TransactionIndex: number
+        TransactionResult: 'tesSUCCESS' | string
+    },
+    validated: boolean
+}
+
+interface OfferCreateResult {
+    Account: string
+    Fee: string
+    Flags: number
+    LastLedgerSequence: number
+    Sequence: number
+    SigningPubKey: string
+    TakerGets: Amount
+    TakerPays: Amount
+    TransactionType: 'OfferCreate',
     TxnSignature: string
     date: number
     hash: string
@@ -241,7 +268,45 @@ const ammWithdraw = async (
     return response.result as AMMWithdrawResponse
 }
 
+const offerCreate = async (
+    seed: string,
+    takerGets: IssuedCurrencyAmount,
+    takerPays: IssuedCurrencyAmount,
+): Promise<OfferCreateResult> => {
+    const wallet = Wallet.fromSeed(seed)
+
+    const response = await offerCreateUtil(
+        wallet,
+        convertToXRPLAsset(takerGets),
+        convertToXRPLAsset(takerPays),
+    )
+
+    return response.result as OfferCreateResult
+}
+
+const accountOffers = async (account: string): Promise<any> => {
+    return accountOffersUtil(account)
+}
+
+const paymentSwap = async (
+    seed: string,
+    swapAsset: IssuedCurrencyAmount,
+    withAsset: IssuedCurrencyAmount
+): Promise<any> => {
+    const wallet = Wallet.fromSeed(seed)
+
+    const response = await sendPayment(
+        wallet,
+        wallet.address,
+        convertToXRPLAsset(withAsset),
+        convertToXRPLAsset(swapAsset),
+    )
+
+    return response.result
+}
+
 export {
+    accountOffers,
     ammDeposit,
     ammInstanceCreate,
     ammInfoByAssets,
@@ -250,4 +315,6 @@ export {
     fundWallet,
     initWallet,
     logBalancesWithIUserList,
+    offerCreate,
+    paymentSwap,
 }

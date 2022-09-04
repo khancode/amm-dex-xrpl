@@ -1,31 +1,73 @@
 import mongoose from "mongoose";
+import { Wallet } from "xrpl";
 import { IPool, Pool } from "../database/models/pool";
 import { IUser, User } from "../database/models/user"
 import { ammInfoByAssets, ammInstanceCreate } from "../xrpl_util";
-import { logBalancesWithIUserList, setupWalletsForAMM } from "../xrpl_util/util"
-import { MATRIX_POOL, MATRIX_USER, POOLS, USERS } from "./matrix_data";
+import { enableRippling, initTrustline, initWallet, logBalancesWithIUserList, sendIOUPayment, setupWalletsForAMM } from "../xrpl_util/util"
+import { ICO, ICOS, MATRIX_POOL, MATRIX_USER, POOLS, USERS } from "./matrix_data";
 
 
 const dropDatabase = async (): Promise<any> => {
   return mongoose.connection.dropDatabase();
 }
 
-const step1_matrix_setupwalletsAMM = async (users: MATRIX_USER[]): Promise<IUser[]> => {
-  await dropDatabase()
+const step0_matrix_setup_ICOs = async (icos: ICO[]): Promise<IUser[]> => {
+  const walletPromises: Promise<{ username: string, wallet: Wallet }>[] = []
+  for (const i in icos) {
+    const currency = icos[i]
+    const username = `${currency}_ICO`
+    walletPromises.push(initWallet(username).then((wallet) => {
+      return {
+        username,
+        wallet,
+      }
+    }))
+  }
 
+  const initWalletResults = await Promise.all(walletPromises)
+  const accountSetPromises: Promise<any>[] = []
+  for (const i in initWalletResults) {
+    const { username, wallet } = initWalletResults[i]
+    accountSetPromises.push(enableRippling(wallet))
+  }
+  await Promise.all(accountSetPromises)
+
+  const icoUserPromises: Promise<IUser>[] = []
+  for (const i in initWalletResults) {
+    const { username, wallet } = initWalletResults[i]
+    const newUser = new User({
+      username,
+      password: username,
+      wallet: {
+        address: wallet.address,
+        seed: wallet.seed!,
+      }
+    })
+    icoUserPromises.push(newUser.save())
+  }
+
+  return Promise.all(icoUserPromises)
+}
+
+const step1_matrix_setup_wallets = async (users: MATRIX_USER[], icoUsers: IUser[]): Promise<IUser[]> => {
   const usersWithWallets: IUser[] = []
+  const userModelPromises: Promise<IUser>[] = []
   for (const i in users) {
     const { username, password, currencies } = users[i]
-    const gatewayUsername = `gateway_${i}`
-    const { gateway, liquidityProvider } = await setupWalletsForAMM(gatewayUsername, username, currencies)
-    const gatewayIUser = {
-      username: gatewayUsername,
-      password: gatewayUsername,
-      wallet: {
-        address: gateway.address,
-        seed: gateway.seed!,
+
+    const liquidityProvider = await initWallet(username)
+    for (const j in currencies) {
+      const currency = currencies[j]
+      const icoUser = icoUsers.find((icoUser) => icoUser.username.split(`_`)[0] === currency)
+      if (icoUser === undefined) {
+        throw Error(`icoUser not found: ${icoUser}`)
       }
+      const icoWallet = Wallet.fromSeed(icoUser?.wallet.seed)
+      const icoValue = `10000`
+      await initTrustline(liquidityProvider, icoWallet, currency, icoValue)
+      await sendIOUPayment(icoWallet, liquidityProvider.address, currency, icoWallet, icoValue)
     }
+
     const liquidityProviderIUser = {
       username,
       password,
@@ -34,14 +76,13 @@ const step1_matrix_setupwalletsAMM = async (users: MATRIX_USER[]): Promise<IUser
         seed: liquidityProvider.seed!,
       }
     }
-    usersWithWallets.push(gatewayIUser, liquidityProviderIUser)
+    usersWithWallets.push(liquidityProviderIUser)
 
-    const gatewayUser = new User(gatewayIUser)
     const liquidityProviderUser = new User(liquidityProviderIUser)
-    await Promise.all([gatewayUser.save(), liquidityProviderUser.save()])
+    userModelPromises.push(liquidityProviderUser.save())
   }
 
-  return usersWithWallets
+  return Promise.all(userModelPromises)
 }
 
 const step2_matrix_createpoolsAMM = async (users: IUser[], pools: MATRIX_POOL[]): Promise<IPool[]> => {
@@ -111,9 +152,12 @@ const step2_matrix_createpoolsAMM = async (users: IUser[], pools: MATRIX_POOL[])
 }
 
 export const matrix_setupAMM = async () => {
-  const usersWithWallets = await step1_matrix_setupwalletsAMM(USERS)
+  await dropDatabase()
+  const icoUsers = await step0_matrix_setup_ICOs(ICOS)
+  const usersWithWallets = await step1_matrix_setup_wallets(USERS, icoUsers)
   const pools = await step2_matrix_createpoolsAMM(usersWithWallets, POOLS)
   return {
+    icoUsers,
     usersWithWallets,
     pools,
   }
