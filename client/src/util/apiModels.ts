@@ -56,6 +56,14 @@ export interface PoolBalance extends AMMInstanceIdentifier {
   validated: boolean
 }
 
+export interface GetAllPoolsBalancesResponse extends Array<PoolBalance> {}
+
 export interface GetUserPoolsBalancesResponse extends Array<PoolBalance> {}
 
 export interface GetOtherPoolsBalancesResponse extends Array<PoolBalance> {}
+
+export interface GetCurrencyExchangeInfoResponse {
+  spotPrice: number
+  exchangeRate: string
+  poolBalance: PoolBalance
+}

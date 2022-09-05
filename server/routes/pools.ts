@@ -68,7 +68,27 @@ router.get('/', async (req: Request, res: Response) => {
     res.status(200).send(pools)
 })
 
-router.get('/include/:username', async (req: Request, res: Response) => {
+router.get('/balances', async (req: Request, res: Response) => {
+    const pools: IPool[] = await Pool.find({})
+
+    const AMMIDList = pools.map((pool) => pool.AMMID)
+
+    const promises = []
+    for (const i in AMMIDList) {
+        const AMMID = AMMIDList[i]
+        promises.push(new Promise((resolve) => {
+            ammInfoById(AMMID).then((ammInfoResponse) => {
+                resolve({ ...ammInfoResponse.result, AMMID })
+            })
+        }))
+    }
+    
+    Promise.all(promises).then((ammInfoResultList) => {
+        res.status(200).send(ammInfoResultList)
+    })
+})
+
+router.get('/balances/include/:username', async (req: Request, res: Response) => {
     const { username } = req.params
 
     const user: IUser|null = await User.findOne({ username })
@@ -107,7 +127,7 @@ router.get('/include/:username', async (req: Request, res: Response) => {
     })
 })
 
-router.get('/exclude/:username', async (req: Request, res: Response) => {
+router.get('/balances/exclude/:username', async (req: Request, res: Response) => {
     const { username } = req.params
 
     const user: IUser|null = await User.findOne({ username })

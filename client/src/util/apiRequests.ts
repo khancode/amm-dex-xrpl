@@ -4,8 +4,10 @@ import {
   UserBalancesResponse,
   LoginResponse,
   CreatePoolResponse,
+  GetAllPoolsBalancesResponse,
   GetUserPoolsBalancesResponse,
   GetOtherPoolsBalancesResponse,
+  GetCurrencyExchangeInfoResponse,
 } from './apiModels'
 
 const API_SERVER = `http://localhost:3000`
@@ -75,6 +77,29 @@ export async function createPool(
 }
 
 /**
+ * Queries balances of all pools.
+ * @param AMMIDList
+ * @returns Promise<PoolsBalancesResponse>
+ */
+export async function getAllPoolsBalances(
+  username: string
+): Promise<GetAllPoolsBalancesResponse> {
+  return await new Promise((resolve, reject) => {
+    axios
+      .get(`${API_POOLS_URL}/balances`)
+      .then((response) => {
+        if (response.status < 200 || response.status > 299) {
+          reject(response.data.error)
+        }
+        resolve(response.data as GetOtherPoolsBalancesResponse)
+      })
+      .catch((error) => {
+        throw new Error(error)
+      })
+  })
+}
+
+/**
  * Queries balances of all pools that a user has liquidity in.
  * This should be called periodically to see latest pool(s) balance(s).
  * @param AMMIDList
@@ -85,7 +110,7 @@ export async function getUserPoolsBalances(
 ): Promise<GetUserPoolsBalancesResponse> {
   return await new Promise((resolve, reject) => {
     axios
-      .get(`${API_POOLS_URL}/include/${username}`)
+      .get(`${API_POOLS_URL}/balances/include/${username}`)
       .then((response) => {
         if (response.status < 200 || response.status > 299) {
           reject(response.data.error)
@@ -109,7 +134,7 @@ export async function getOtherPoolsBalances(
 ): Promise<GetOtherPoolsBalancesResponse> {
   return await new Promise((resolve, reject) => {
     axios
-      .get(`${API_POOLS_URL}/exclude/${username}`)
+      .get(`${API_POOLS_URL}/balances/exclude/${username}`)
       .then((response) => {
         if (response.status < 200 || response.status > 299) {
           reject(response.data.error)
@@ -184,6 +209,48 @@ export async function swapAssets(
           reject(response.data.error)
         }
         resolve(response.data as CreatePoolResponse)
+      })
+      .catch((error) => {
+        throw new Error(error)
+      })
+  })
+}
+
+export async function getCurrencyExchangeInfo(
+  swapAsset: CurrencyIssuerValue,
+  withAsset: CurrencyIssuerValue
+): Promise<GetCurrencyExchangeInfoResponse> {
+  return await new Promise((resolve, reject) => {
+    const body = { swapAsset, withAsset }
+    axios
+      .post(`${API_SWAP_URL}/spotprice`, body)
+      .then((response) => {
+        if (response.status < 200 || response.status > 299) {
+          reject(response.data.error)
+        }
+        resolve(response.data as GetCurrencyExchangeInfoResponse)
+      })
+      .catch((error) => {
+        throw new Error(error)
+      })
+  })
+}
+
+export async function swapAssetsDepositWithdraw(
+  username: string,
+  AMMID: string,
+  swapAsset: CurrencyIssuerValue,
+  withAsset: CurrencyIssuerValue
+): Promise<any> {
+  return await new Promise((resolve, reject) => {
+    const body = { username, AMMID, swapAsset, withAsset }
+    axios
+      .post(`${API_SWAP_URL}/depositwithdraw`, body)
+      .then((response) => {
+        if (response.status < 200 || response.status > 299) {
+          reject(response.data.error)
+        }
+        resolve(response.data)
       })
       .catch((error) => {
         throw new Error(error)

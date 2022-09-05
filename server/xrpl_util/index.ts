@@ -24,7 +24,7 @@ const convertToXRPLAsset = (asset: IssuedCurrencyAmount): Amount => {
     return asset.currency === XRP ? xrpToDrops(asset.value) : asset
 }
 
-interface AMMInstanceCreateResponse {
+interface AMMInstanceCreateResult {
     Account: string
     Asset1: string
     Asset2: string
@@ -33,7 +33,7 @@ interface AMMInstanceCreateResponse {
     Flags: number
 }
 
-interface AMMDepositResponse {
+interface AMMDepositResult {
     AMMID: string
     Account: string
     LPToken?: IssuedCurrencyAmount
@@ -59,7 +59,7 @@ interface AMMDepositResponse {
     validated: boolean
 }
 
-interface AMMWithdrawResponse {
+interface AMMWithdrawResult {
     AMMID: string
     Account: string
     LPToken?: IssuedCurrencyAmount
@@ -113,7 +113,7 @@ const ammInstanceCreate = async (
     asset1: IssuedCurrencyAmount,
     asset2: IssuedCurrencyAmount,
     tradingFee: number
-): Promise<AMMInstanceCreateResponse> => {
+): Promise<AMMInstanceCreateResult> => {
     const liquidityProvider = Wallet.fromSeed(seed)
     const xrplAsset1 = convertToXRPLAsset(asset1)
     const xrplAsset2 = convertToXRPLAsset(asset2)
@@ -153,7 +153,7 @@ const ammDeposit = async (
     asset1: IssuedCurrencyAmount,
     asset2: IssuedCurrencyAmount,
     epriceValue: string,
-): Promise<AMMDepositResponse> => {
+): Promise<AMMDepositResult> => {
     const liquidityProvider = Wallet.fromSeed(seed)
 
     const ammDepositTx = {
@@ -204,7 +204,7 @@ const ammDeposit = async (
     void txModel.save()
 
     const response = await autofillAndSubmit(liquidityProvider, ammDepositTx)
-    return response.result as AMMDepositResponse
+    return response.result as AMMDepositResult
 }
 
 const ammWithdraw = async (
@@ -214,7 +214,7 @@ const ammWithdraw = async (
     asset1: IssuedCurrencyAmount,
     asset2: IssuedCurrencyAmount,
     epriceValue: string,
-): Promise<AMMWithdrawResponse> => {
+): Promise<AMMWithdrawResult> => {
     const liquidityProvider = Wallet.fromSeed(seed)
 
     const ammWithdrawTx = {
@@ -265,7 +265,7 @@ const ammWithdraw = async (
     void txModel.save()
 
     const response = await autofillAndSubmit(liquidityProvider, ammWithdrawTx)
-    return response.result as AMMWithdrawResponse
+    return response.result as AMMWithdrawResult
 }
 
 const offerCreate = async (

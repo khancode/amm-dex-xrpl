@@ -1,14 +1,23 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { ChangeEvent, useContext, useEffect, useState } from 'react'
 import { Button, Card, Form, InputGroup } from 'react-bootstrap'
 import { UserContext } from '../components/layout/Page'
 import { getCurrencyOptions, getIssuer } from '../components/modals/common'
 import { CurrencyIssuerValue } from '../types'
-import { UserBalancesResponse } from '../util/apiModels'
-import { getUserBalances, swapAssets } from '../util/apiRequests'
+import {
+  GetCurrencyExchangeInfoResponse,
+  UserBalancesResponse,
+} from '../util/apiModels'
+import {
+  getCurrencyExchangeInfo,
+  getUserBalances,
+  swapAssetsDepositWithdraw,
+} from '../util/apiRequests'
 
 export const Swap: React.FC<{}> = () => {
   const { user, loading } = useContext(UserContext)
   const [userBalances, setUserBalances] = useState<UserBalancesResponse>()
+  const [currencyExchangeInfo, setCurrencyExchangeInfo] =
+    useState<GetCurrencyExchangeInfoResponse>()
 
   const [swapAsset, setSwapAsset] = useState<CurrencyIssuerValue>({
     currency: ``,
@@ -23,22 +32,113 @@ export const Swap: React.FC<{}> = () => {
 
   useEffect(() => {
     if (!loading) {
-      getUserBalances(user?.user.username).then((UserBalancesResponse) => {
-        setUserBalances(UserBalancesResponse)
+      getUserBalances(user?.user.username).then((userBalancesRes) => {
+        setUserBalances(userBalancesRes)
       })
     }
   }, [loading])
 
-  const handleSwap = (): void => {
-    swapAssets(user?.user.username, swapAsset, withAsset).then(
-      (swapAssetsResponse) => {
-        // TODO: handle swapAssetsResponse data
-        console.log(`TODO: handle swapAssetsResponse data`)
-        console.log(
-          `swapAssetsResponse: ${JSON.stringify(swapAssetsResponse, null, 4)}`
-        )
+  const handleSwapAssetCurrencyChange = (
+    event: ChangeEvent<HTMLSelectElement>
+  ): void => {
+    const newCurrency = event.target.value
+    const newSwapAsset = {
+      ...swapAsset,
+      currency: newCurrency,
+      issuer: getIssuer(userBalances!, newCurrency),
+    }
+    setSwapAsset(newSwapAsset)
+
+    if (withAsset.currency === ``) {
+      return
+    }
+
+    getCurrencyExchangeInfo(newSwapAsset, withAsset).then(
+      (getCurrencyExchangeInfoResponse) => {
+        setCurrencyExchangeInfo(getCurrencyExchangeInfoResponse)
       }
     )
+  }
+
+  const handleWithAssetCurrencyChange = (
+    event: ChangeEvent<HTMLSelectElement>
+  ): void => {
+    const newCurrency = event.target.value
+    const newWithAsset = {
+      ...withAsset,
+      currency: newCurrency,
+      issuer: getIssuer(userBalances!, newCurrency),
+    }
+    setWithAsset(newWithAsset)
+
+    if (swapAsset.currency === ``) {
+      return
+    }
+
+    getCurrencyExchangeInfo(swapAsset, newWithAsset).then(
+      (getCurrencyExchangeInfoResponse) => {
+        setCurrencyExchangeInfo(getCurrencyExchangeInfoResponse)
+      }
+    )
+  }
+
+  const handleSwapAssetValueChange = (event: ChangeEvent<any>): void => {
+    const newValue = event.target.value
+    const newSwapAsset = {
+      ...swapAsset,
+      value: newValue,
+    }
+    setSwapAsset(newSwapAsset)
+
+    if (currencyExchangeInfo == null) {
+      return
+    }
+
+    const newWithAsset = {
+      ...withAsset,
+      value: String(Number(newValue) * currencyExchangeInfo.spotPrice),
+    }
+    setWithAsset(newWithAsset)
+  }
+
+  const handleWithAssetValueChange = (event: ChangeEvent<any>): void => {
+    const newValue = event.target.value
+    const newWithAsset = {
+      ...withAsset,
+      value: newValue,
+    }
+    setWithAsset(newWithAsset)
+
+    if (currencyExchangeInfo == null) {
+      return
+    }
+
+    const newSwapAsset = {
+      ...swapAsset,
+      value: String(Number(newValue) / currencyExchangeInfo.spotPrice),
+    }
+    setSwapAsset(newSwapAsset)
+  }
+
+  const handleSwap = (): void => {
+    if (currencyExchangeInfo == null) {
+      throw Error(`currencyExchangeInfo is undefined`)
+    }
+
+    swapAssetsDepositWithdraw(
+      user?.user.username,
+      currencyExchangeInfo?.poolBalance.AMMID,
+      swapAsset,
+      withAsset
+    ).then((swapAssetsDepositWithdraw) => {
+      console.log(
+        `swapAssetsDepositWithdraw: ${JSON.stringify(
+          swapAssetsDepositWithdraw,
+          null,
+          4
+        )}`
+      )
+    })
   }
 
   return (
@@ -55,14 +155,7 @@ export const Swap: React.FC<{}> = () => {
               <InputGroup className="mb-3">
                 <Form.Select
                   value={swapAsset?.currency}
-                  onChange={(event) => {
-                    const newSwapAsset = {
-                      ...swapAsset,
-                      currency: event.target.value,
-                      issuer: getIssuer(userBalances!, event.target.value),
-                    }
-                    setSwapAsset(newSwapAsset)
-                  }}
+                  onChange={handleSwapAssetCurrencyChange}
                 >
                   <option>Select Currency</option>
                   {getCurrencyOptions(userBalances!)}
@@ -84,13 +177,7 @@ export const Swap: React.FC<{}> = () => {
                   min="0"
                   placeholder="value"
                   value={swapAsset?.value}
-                  onChange={(event) => {
-                    const newSwapAsset = {
-                      ...swapAsset,
-                      value: event.target.value,
-                    }
-                    setSwapAsset(newSwapAsset)
-                  }}
+                  onChange={handleSwapAssetValueChange}
                 />
               </InputGroup>
             </Form.Group>
@@ -101,14 +188,7 @@ export const Swap: React.FC<{}> = () => {
               <InputGroup className="mb-3">
                 <Form.Select
                   value={withAsset?.currency}
-                  onChange={(event) => {
-                    const newwithAsset = {
-                      ...withAsset,
-                      currency: event.target.value,
-                      issuer: getIssuer(userBalances!, event.target.value),
-                    }
-                    setWithAsset(newwithAsset)
-                  }}
+                  onChange={handleWithAssetCurrencyChange}
                 >
                   <option>Select Currency</option>
                   {getCurrencyOptions(userBalances!)}
@@ -130,16 +210,13 @@ export const Swap: React.FC<{}> = () => {
                   min="0"
                   placeholder="value"
                   value={withAsset?.value}
-                  onChange={(event) => {
-                    const newwithAsset = {
-                      ...withAsset,
-                      value: event.target.value,
-                    }
-                    setWithAsset(newwithAsset)
-                  }}
+                  onChange={handleWithAssetValueChange}
                 />
               </InputGroup>
             </Form.Group>
+
+            <div>{currencyExchangeInfo?.exchangeRate}</div>
+
             <Button onClick={handleSwap}>Swap</Button>
           </Form>
         </Card.Body>
