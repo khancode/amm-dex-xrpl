@@ -98,8 +98,9 @@ router.post('/spotprice', async (req: Request, res: Response) => {
     const totalBalance = Ra + Rb
     const Wa = Ra / totalBalance
     const Wb = Rb / totalBalance
+    const tradingFeePercentage = TradingFee * .001 * .01
 
-    const spotPrice = ((Rb^Wb) / (Ra^Wa)) * (1 / (1 - TradingFee))
+    const spotPrice = ((Rb^Wb) / (Ra^Wa)) * (1 / (1 - tradingFeePercentage))
     const exchangeRate =
         `1 ${typeof swapAssetSelected === `string` ? `XRP` : swapAssetSelected.currency} = ${spotPrice} ${typeof withAssetSelected === `string` ? `XRP` : withAssetSelected.currency}`
 
