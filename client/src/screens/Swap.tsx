@@ -1,5 +1,7 @@
 import React, { ChangeEvent, useContext, useEffect, useState } from 'react'
-import { Button, Card, Form, InputGroup } from 'react-bootstrap'
+import { Button, Card, Col, Form, InputGroup, Row } from 'react-bootstrap'
+import { BsArrowDownCircle } from 'react-icons/bs'
+
 import { UserContext } from '../components/layout/Page'
 import { getCurrencyOptions, getIssuer } from '../components/modals/common'
 import { CurrencyIssuerValue } from '../types'
@@ -12,6 +14,7 @@ import {
   getUserBalances,
   swapAssetsDepositWithdraw,
 } from '../util/apiRequests'
+import './Swap.scss'
 
 export const Swap: React.FC<{}> = () => {
   const { user, loading } = useContext(UserContext)
@@ -142,82 +145,74 @@ export const Swap: React.FC<{}> = () => {
   }
 
   return (
-    <div>
-      <h1>Swap screen!</h1>
-      <Card>
-        <Card.Header>Swap</Card.Header>
+    <div className="swap-screen">
+      <Card className="swap-card">
+        <Card.Header>
+          <Card.Title>Swap</Card.Title>
+        </Card.Header>
         <Card.Body>
           <Form>
-            <Form.Group className="mb-3" controlId="swapForm.swapAsset">
-              <Card.Title>
-                <Form.Label>Swap Asset</Form.Label>
-              </Card.Title>
-              <InputGroup className="mb-3">
-                <Form.Select
-                  value={swapAsset?.currency}
-                  onChange={handleSwapAssetCurrencyChange}
-                >
-                  <option>Select Currency</option>
-                  {getCurrencyOptions(userBalances!)}
-                </Form.Select>
-              </InputGroup>
-              <InputGroup className="mb-3">
-                <InputGroup.Text>Issuer</InputGroup.Text>
-                <Form.Control
-                  disabled
-                  readOnly
-                  type="text"
-                  value={getIssuer(userBalances!, swapAsset?.currency)}
-                />
-              </InputGroup>
-              <InputGroup className="mb-3">
-                <InputGroup.Text>Value</InputGroup.Text>
-                <Form.Control
-                  type="number"
-                  min="0"
-                  placeholder="value"
-                  value={swapAsset?.value}
-                  onChange={handleSwapAssetValueChange}
-                />
-              </InputGroup>
+            <Form.Group controlId="swapForm.swapAsset">
+              <Row>
+                <Col>
+                  <InputGroup className="mb-3">
+                    <Form.Control
+                      type="number"
+                      min="0"
+                      placeholder="0.0"
+                      value={swapAsset?.value}
+                      onChange={handleSwapAssetValueChange}
+                    />
+                  </InputGroup>
+                </Col>
+                <Col>
+                  <InputGroup className="mb-3">
+                    <Form.Select
+                      value={swapAsset?.currency}
+                      onChange={handleSwapAssetCurrencyChange}
+                    >
+                      <option>Select Currency</option>
+                      {getCurrencyOptions(userBalances!)}
+                    </Form.Select>
+                  </InputGroup>
+                </Col>
+              </Row>
             </Form.Group>
+            <Row className="mb-3">
+              <BsArrowDownCircle className="arrow-down-circle-icon" />
+            </Row>
             <Form.Group className="mb-3" controlId="swapForm.withAsset">
-              <Card.Title>
-                <Form.Label>With</Form.Label>
-              </Card.Title>
-              <InputGroup className="mb-3">
-                <Form.Select
-                  value={withAsset?.currency}
-                  onChange={handleWithAssetCurrencyChange}
-                >
-                  <option>Select Currency</option>
-                  {getCurrencyOptions(userBalances!)}
-                </Form.Select>
-              </InputGroup>
-              <InputGroup className="mb-3">
-                <InputGroup.Text>Issuer</InputGroup.Text>
-                <Form.Control
-                  disabled
-                  readOnly
-                  type="text"
-                  value={getIssuer(userBalances!, withAsset?.currency)}
-                />
-              </InputGroup>
-              <InputGroup className="mb-3">
-                <InputGroup.Text>Value</InputGroup.Text>
-                <Form.Control
-                  type="number"
-                  min="0"
-                  placeholder="value"
-                  value={withAsset?.value}
-                  onChange={handleWithAssetValueChange}
-                />
-              </InputGroup>
+              <Row>
+                <Col>
+                  <InputGroup className="mb-3">
+                    <Form.Control
+                      type="number"
+                      min="0"
+                      placeholder="0.0"
+                      value={withAsset?.value}
+                      onChange={handleWithAssetValueChange}
+                    />
+                  </InputGroup>
+                </Col>
+                <Col>
+                  <InputGroup className="mb-3">
+                    <Form.Select
+                      value={withAsset?.currency}
+                      onChange={handleWithAssetCurrencyChange}
+                    >
+                      <option>Select Currency</option>
+                      {getCurrencyOptions(userBalances!)}
+                    </Form.Select>
+                  </InputGroup>
+                </Col>
+              </Row>
             </Form.Group>
 
             <div>{currencyExchangeInfo?.exchangeRate}</div>
 
-            <Button onClick={handleSwap}>Swap</Button>
+            <Button className="swap-button" onClick={handleSwap}>
+              Swap
+            </Button>
           </Form>
         </Card.Body>
       </Card>

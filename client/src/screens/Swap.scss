@@ -1,0 +1,16 @@
+.swap-screen {
+  display: flex;
+  justify-content: center;
+
+  .swap-card {
+    width: 500px;
+
+    .arrow-down-circle-icon {
+      font-size: 35px;
+    }
+
+    .swap-button {
+      width: 100%;
+    }
+  }
+}
