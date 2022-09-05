@@ -8,6 +8,7 @@ import users from './users'
 import ammdevnet from './ammdevnet'
 import setupdata from './setupdata'
 import swap from './swap'
+import vote from './vote'
 
 const router: Router = express.Router()
 
@@ -18,5 +19,6 @@ router.use('/users', users)
 router.use('/setupdata', setupdata)
 router.use('/ammdevnet', ammdevnet)
 router.use('/swap', swap)
+router.use('/vote', vote)
 
 export default router

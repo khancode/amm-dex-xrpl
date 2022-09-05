@@ -15,6 +15,7 @@ const API_LOGIN_URL = `${API_SERVER}/login`
 const API_USERS_URL = `${API_SERVER}/users`
 const API_POOLS_URL = `${API_SERVER}/pools`
 const API_SWAP_URL = `${API_SERVER}/swap`
+const API_VOTE_URL = `${API_SERVER}/vote`
 
 export async function login(
   username: string,
@@ -246,6 +247,27 @@ export async function swapAssetsDepositWithdraw(
     const body = { username, AMMID, swapAsset, withAsset }
     axios
       .post(`${API_SWAP_URL}/depositwithdraw`, body)
+      .then((response) => {
+        if (response.status < 200 || response.status > 299) {
+          reject(response.data.error)
+        }
+        resolve(response.data)
+      })
+      .catch((error) => {
+        throw new Error(error)
+      })
+  })
+}
+
+export async function vote(
+  username: string,
+  AMMID: string,
+  FeeVal: number
+): Promise<any> {
+  return await new Promise((resolve, reject) => {
+    const body = { username, AMMID, FeeVal }
+    axios
+      .post(`${API_VOTE_URL}`, body)
       .then((response) => {
         if (response.status < 200 || response.status > 299) {
           reject(response.data.error)

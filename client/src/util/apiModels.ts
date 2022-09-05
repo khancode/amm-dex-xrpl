@@ -54,6 +54,10 @@ export interface PoolBalance extends AMMInstanceIdentifier {
   TradingFee: number
   ledger_current_index: number
   validated: boolean
+  VoteSlots?: Array<{
+    FeeVal: number
+    VoteWeight: number
+  }>
 }
 
 export interface GetAllPoolsBalancesResponse extends Array<PoolBalance> {}

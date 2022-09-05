@@ -14,6 +14,7 @@ import {
     offerCreate as offerCreateUtil,
     sendPayment,
     submitAmmInstanceCreate,
+    submitAmmVote,
 } from "./util";
 
 const XRP = 'XRP'
@@ -305,12 +306,29 @@ const paymentSwap = async (
     return response.result
 }
 
+const ammVote = async (
+    seed: string,
+    AMMID: string,
+    FeeVal: number
+): Promise<any> => {
+    const wallet = Wallet.fromSeed(seed)
+
+    const response = await submitAmmVote(
+        wallet,
+        AMMID,
+        FeeVal,
+    )
+
+    return response.result
+}
+
 export {
     accountOffers,
     ammDeposit,
     ammInstanceCreate,
     ammInfoByAssets,
     ammInfoById,
+    ammVote,
     ammWithdraw,
     fundWallet,
     initWallet,

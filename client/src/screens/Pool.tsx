@@ -4,6 +4,7 @@ import Button from 'react-bootstrap/Button'
 import { UserContext } from '../components/layout/Page'
 import { ChangeLiquidityModal } from '../components/modals/ChangeLiquidityModal'
 import { CreatePoolModal } from '../components/modals/CreatePoolModal'
+import { VoteModal } from '../components/modals/VoteModal'
 import { ShowPool } from '../components/ShowPool'
 import { AMMTransactionType, CurrencyIssuerValue } from '../types'
 import {
@@ -19,6 +20,7 @@ import {
   getOtherPoolsBalances,
   depositIntoPool,
   withdrawFromPool,
+  vote,
 } from '../util/apiRequests'
 
 export const Pool: React.FC<{}> = () => {
@@ -32,7 +34,8 @@ export const Pool: React.FC<{}> = () => {
     useState<PoolBalance>()
   const [showCreatePoolModal, setShowCreatePoolModal] = useState<boolean>(false) // DEV: set to true to immediately open modal
   const [showChangeLiquidityModal, setShowChangeLiquidityModal] =
-    useState<boolean>(false) // DEV: set to true to immediately open modal
+    useState<boolean>(false)
+  const [showVoteModal, setShowVoteModal] = useState<boolean>(false)
   const [showLoadingIndicator, setShowLoadingIndicator] =
     useState<boolean>(false)
 
@@ -60,6 +63,10 @@ export const Pool: React.FC<{}> = () => {
 
   const toggleChangeLiquidityModal = (): void => {
     setShowChangeLiquidityModal(!showChangeLiquidityModal)
+  }
+
+  const toggleVoteModal = (): void => {
+    setShowVoteModal(!showVoteModal)
   }
 
   const onCreate = (
@@ -103,7 +110,7 @@ export const Pool: React.FC<{}> = () => {
     })
   }
 
-  const onSubmit = (
+  const onLiquidityChangeSubmit = (
     AMMID: string,
     transactionType: AMMTransactionType,
     LPToken: CurrencyIssuerValue | null,
@@ -166,6 +173,26 @@ export const Pool: React.FC<{}> = () => {
     }
   }
 
+  const onVoteSubmit = (AMMID: string, FeeVal: number): void => {
+    setShowLoadingIndicator(true)
+
+    // TODO: implement API route
+    vote(user?.user.username, AMMID, FeeVal).then((voteResponse) => {
+      console.log(`voteResponse - down below:`)
+      console.log(voteResponse)
+      getUserBalances(user?.user.username).then((userBalancesResponse) => {
+        setUserBalances(userBalancesResponse)
+        setShowLoadingIndicator(false)
+        toggleVoteModal()
+      })
+      getUserPoolsBalances(user?.user.username).then(
+        (getUserPoolsBalancesResponse) => {
+          setUserPoolsBalances(getUserPoolsBalancesResponse)
+        }
+      )
+    })
+  }
+
   const myBalances = (): ReactElement | ReactElement[] => {
     if (userBalances == null) {
       return <div>No balances</div>
@@ -187,6 +214,11 @@ export const Pool: React.FC<{}> = () => {
     setShowChangeLiquidityModal(!showChangeLiquidityModal)
   }
 
+  const onVoteButtonClick = (poolBalance: PoolBalance): void => {
+    setLiquidityPoolSelected(poolBalance)
+    setShowVoteModal(!showVoteModal)
+  }
+
   const showPools = (
     poolsBalances: GetUserPoolsBalancesResponse | GetOtherPoolsBalancesResponse
   ): ReactElement | ReactElement[] => {
@@ -195,11 +227,18 @@ export const Pool: React.FC<{}> = () => {
     }
 
     return poolsBalances.map((poolBalance) => {
+      const isVotable =
+        userBalances?.balances.find(({ currency }) => {
+          return currency === poolBalance.LPToken.currency
+        }) != null
+      const onVoteButtonClickParam = isVotable ? onVoteButtonClick : undefined
+
       return (
         <ShowPool
           key={poolBalance.AMMID}
           poolBalance={poolBalance}
           onPlusMinusLiquidityButtonClick={onPlusMinusLiquidityButtonClick}
+          onVoteButtonClick={onVoteButtonClickParam}
         />
       )
     })
@@ -224,11 +263,18 @@ export const Pool: React.FC<{}> = () => {
         onCreate={onCreate}
         showLoadingIndicator={showLoadingIndicator}
       />
+      <VoteModal
+        show={showVoteModal}
+        onHide={toggleVoteModal}
+        onSubmit={onVoteSubmit}
+        showLoadingIndicator={showLoadingIndicator}
+        poolBalance={liquidityPoolSelected!}
+      />
       <ChangeLiquidityModal
         show={showChangeLiquidityModal}
         userBalances={userBalances!}
         onHide={toggleChangeLiquidityModal}
-        onSubmit={onSubmit}
+        onSubmit={onLiquidityChangeSubmit}
         showLoadingIndicator={showLoadingIndicator}
         poolBalance={liquidityPoolSelected!}
       />

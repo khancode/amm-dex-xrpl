@@ -493,6 +493,26 @@ async function enableRippling(wallet: Wallet) {
     return autofillAndSubmit(wallet, accountSet)
 }
 
+async function submitAmmVote(wallet: Wallet, AMMID: string, FeeVal: number) {
+    const ammVoteTx = {
+        TransactionType: 'AMMVote',
+        Account: wallet.address,
+        AMMID,
+        FeeVal,
+    }
+    validate(ammVoteTx)
+
+    // Write to MongoDB
+    const txModel = new Transaction({
+        date: new Date(),
+        transactionType: ammVoteTx.TransactionType,
+        payload: ammVoteTx,
+    })
+    void txModel.save()
+
+    return autofillAndSubmit(wallet, ammVoteTx)
+}
+
 export {
     accountOffers,
     autofillAndSubmit,
@@ -516,5 +536,6 @@ export {
     submitAmmDepositWithAsset1In,
     submitAmmDepositWithAsset1InAndAsset2In,
     submitAmmInstanceCreate,
+    submitAmmVote,
     walletAliasMap,
 }
