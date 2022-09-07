@@ -1,4 +1,5 @@
 import React, { ReactElement, useContext, useEffect, useState } from 'react'
+import { Table } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 
 import { UserContext } from '../components/layout/Page'
@@ -22,6 +23,7 @@ import {
   withdrawFromPool,
   vote,
 } from '../util/apiRequests'
+import './Pool.scss'
 
 export const Pool: React.FC<{}> = () => {
   const { user, loading } = useContext(UserContext)
@@ -198,15 +200,29 @@ export const Pool: React.FC<{}> = () => {
       return <div>No balances</div>
     }
 
-    return userBalances.balances.map((userBalance) => {
-      const { currency, issuer, value } = userBalance
-      return (
-        <div key={`${currency}${issuer != null ? `_` + issuer : ``}`}>
-          <b>{`${currency} -> ${Number(value).toLocaleString()}`}</b>
-          {issuer != null && <div>{issuer}</div>}
-        </div>
-      )
-    })
+    return (
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>Currency</th>
+            <th>Balance</th>
+            <th>Issuer</th>
+          </tr>
+        </thead>
+        <tbody>
+          {userBalances.balances.map((userBalance) => {
+            const { currency, issuer, value } = userBalance
+            return (
+              <tr key={`${currency}${issuer != null ? `_` + issuer : ``}`}>
+                <td>{currency}</td>
+                <td>{Number(value).toLocaleString()}</td>
+                <td>{issuer}</td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </Table>
+    )
   }
 
   const onPlusMinusLiquidityButtonClick = (poolBalance: PoolBalance): void => {
@@ -245,15 +261,20 @@ export const Pool: React.FC<{}> = () => {
   }
 
   return (
-    <div>
-      <h1>Pool screen!</h1>
-      <h3>Balances</h3>
-      <div>{myBalances()}</div>
+    <div className="pool-screen">
+      <div className="balances">
+        <h2>Balances</h2>
+        <div>{myBalances()}</div>
+      </div>
       <Button onClick={toggleCreatePoolModal}>+ Create Pool</Button>
-      <h3>My Positions</h3>
-      <div>{showPools(userPoolsBalances)}</div>
-      <h3>Other Pools</h3>
-      <div>{showPools(otherPoolsBalances)}</div>
+      <div>
+        <h2>My Positions</h2>
+        <div>{showPools(userPoolsBalances)}</div>
+      </div>
+      <div>
+        <h2>Available Pools</h2>
+        <div>{showPools(otherPoolsBalances)}</div>
+      </div>
 
       {/* All Modals used below: */}
       <CreatePoolModal
