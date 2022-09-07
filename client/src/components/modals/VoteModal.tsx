@@ -95,7 +95,7 @@ export const VoteModal: React.FC<VoteModalProps> = ({
               <tr key={`${FeeVal}_${VoteWeight}`}>
                 <td>{voteRank}</td>
                 <td>{formatTradingFeeToPercent(FeeVal)}</td>
-                <td>{VoteWeight}</td>
+                <td>{VoteWeight.toLocaleString()}</td>
               </tr>
             )
           })}
