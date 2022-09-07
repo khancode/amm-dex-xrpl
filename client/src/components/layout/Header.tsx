@@ -8,7 +8,7 @@ import { Container, Nav, Navbar } from 'react-bootstrap'
 import { getUserBalances } from '../../util/apiRequests'
 import { UserBalancesResponse } from '../../util/apiModels'
 
-const SCREENS = new Set<string>([`swap`, `pool`])
+const SCREENS = new Set<string>([`swap`, `pool`, `transactions`])
 const DEFAULT_SCREEN = `swap`
 
 export const Header: React.FC<{}> = () => {

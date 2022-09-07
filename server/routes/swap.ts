@@ -137,6 +137,10 @@ router.post('/depositwithdraw', async (req: Request, res: Response) => {
         return
     }
 
+    const slippagePercentage = 0.05
+    const updateWithAsset = { ...withAsset }
+    updateWithAsset.value = updateWithAsset.value * (1 - slippagePercentage)
+
     const withdrawResult = await ammWithdraw(
         user.wallet.seed,
         AMMID,

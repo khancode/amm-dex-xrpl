@@ -1,0 +1,12 @@
+.transactions-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+
+  .transaction-card-title {
+    display: flex;
+    justify-content: space-around;
+  }
+}

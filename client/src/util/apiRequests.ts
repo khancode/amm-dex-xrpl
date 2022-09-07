@@ -16,6 +16,7 @@ const API_USERS_URL = `${API_SERVER}/users`
 const API_POOLS_URL = `${API_SERVER}/pools`
 const API_SWAP_URL = `${API_SERVER}/swap`
 const API_VOTE_URL = `${API_SERVER}/vote`
+const API_TRANSACTIONS_URL = `${API_SERVER}/transactions`
 
 export async function login(
   username: string,
@@ -268,6 +269,22 @@ export async function vote(
     const body = { username, AMMID, FeeVal }
     axios
       .post(`${API_VOTE_URL}`, body)
+      .then((response) => {
+        if (response.status < 200 || response.status > 299) {
+          reject(response.data.error)
+        }
+        resolve(response.data)
+      })
+      .catch((error) => {
+        throw new Error(error)
+      })
+  })
+}
+
+export async function getTransactions(): Promise<any> {
+  return await new Promise((resolve, reject) => {
+    axios
+      .get(API_TRANSACTIONS_URL)
       .then((response) => {
         if (response.status < 200 || response.status > 299) {
           reject(response.data.error)
