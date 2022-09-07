@@ -262,7 +262,7 @@ export const Pool: React.FC<{}> = () => {
 
   return (
     <div className="pool-screen">
-      <div className="balances">
+      <div>
         <h2>Balances</h2>
         <div>{myBalances()}</div>
       </div>

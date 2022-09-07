@@ -33,14 +33,14 @@ export const ShowPool: React.FC<ShowPoolProps> = ({
     LPToken.currency
   })`
   return (
-    <Card className="pool">
+    <Card className="show-pool">
       <Card.Header>
         <div className="row">
           <div className="col">{LPTokenDetails}</div>
           <Button
             hidden={onVoteButtonClick == null}
             variant="outline-primary"
-            className="col-2"
+            className="vote-button col-2"
             onClick={() => onVoteButtonClick!(poolBalance)}
           >
             Vote
