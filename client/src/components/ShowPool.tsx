@@ -41,7 +41,7 @@ export const ShowPool: React.FC<ShowPoolProps> = ({
       <Card.Header>
         <div className="row">
           <div className="col">
-            {isPreview ? `Preview of AMM Instance Result` : LPTokenDetails}
+            {isPreview ? `AMM Instance Preview` : LPTokenDetails}
           </div>
           <Button
             hidden={onVoteButtonClick == null}
@@ -61,7 +61,7 @@ export const ShowPool: React.FC<ShowPoolProps> = ({
         </div>
       </Card.Header>
       <Card.Body>
-        <ProgressBar>
+        <ProgressBar className="progress-bar-pool">
           <ProgressBar
             now={asset1Percentage}
             label={asset1Label}
