@@ -1,5 +1,13 @@
 import React, { ReactElement, useEffect, useState } from 'react'
-import { Card, Form, InputGroup, Nav, Spinner } from 'react-bootstrap'
+import {
+  Col,
+  Form,
+  FormGroup,
+  InputGroup,
+  Nav,
+  Row,
+  Spinner,
+} from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import { AMMTransactionType, CurrencyIssuerValue } from '../../types'
@@ -141,44 +149,43 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
           controlId="exampleForm.ControlInput1"
         >
           <Form.Label>LPToken</Form.Label>
-          <InputGroup className="mb-3">
-            <Form.Select
-              value={LPToken?.currency}
-              onChange={(event) => {
-                const newLPToken = {
-                  ...LPToken!,
-                  currency: event.target.value,
-                  issuer: getIssuer(userBalances, event.target.value),
-                }
-                setLPToken(newLPToken)
-              }}
-            >
-              <option>Select Currency</option>
-              {getCurrencyOptions(userBalances)}
-            </Form.Select>
-          </InputGroup>
-          <InputGroup className="mb-3">
-            <InputGroup.Text>Issuer</InputGroup.Text>
-            <Form.Control
-              disabled
-              readOnly
-              type="text"
-              value={getIssuer(userBalances, LPToken?.currency)}
-            />
-          </InputGroup>
-          <InputGroup className="mb-3">
-            <InputGroup.Text>Value</InputGroup.Text>
-            <Form.Control
-              type="number"
-              min="0"
-              placeholder="value"
-              value={LPToken?.value}
-              onChange={(event) => {
-                const newLPToken = { ...LPToken!, value: event.target.value }
-                setLPToken(newLPToken)
-              }}
-            />
-          </InputGroup>
+          <Row>
+            <Col>
+              <InputGroup className="mb-3">
+                <Form.Control
+                  type="number"
+                  min="0"
+                  placeholder="value"
+                  value={LPToken?.value}
+                  onChange={(event) => {
+                    const newLPToken = {
+                      ...LPToken!,
+                      value: event.target.value,
+                    }
+                    setLPToken(newLPToken)
+                  }}
+                />
+              </InputGroup>
+            </Col>
+            <Col>
+              <InputGroup className="mb-3">
+                <Form.Select
+                  value={LPToken?.currency}
+                  onChange={(event) => {
+                    const newLPToken = {
+                      ...LPToken!,
+                      currency: event.target.value,
+                      issuer: getIssuer(userBalances, event.target.value),
+                    }
+                    setLPToken(newLPToken)
+                  }}
+                >
+                  <option>Select Currency</option>
+                  {getCurrencyOptions(userBalances)}
+                </Form.Select>
+              </InputGroup>
+            </Col>
+          </Row>
         </Form.Group>
         <Form.Group
           hidden={!assets.includes(`asset1`)}
@@ -186,44 +193,40 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
           controlId="exampleForm.ControlInput1"
         >
           <Form.Label>Asset1</Form.Label>
-          <InputGroup className="mb-3">
-            <Form.Select
-              value={Asset1?.currency}
-              onChange={(event) => {
-                const newAsset1 = {
-                  ...Asset1!,
-                  currency: event.target.value,
-                  issuer: getIssuer(userBalances, event.target.value),
-                }
-                setAsset1(newAsset1)
-              }}
-            >
-              <option>Select Currency</option>
-              {getCurrencyOptions(userBalances)}
-            </Form.Select>
-          </InputGroup>
-          <InputGroup className="mb-3">
-            <InputGroup.Text>Issuer</InputGroup.Text>
-            <Form.Control
-              disabled
-              readOnly
-              type="text"
-              value={getIssuer(userBalances, Asset1?.currency)}
-            />
-          </InputGroup>
-          <InputGroup className="mb-3">
-            <InputGroup.Text>Value</InputGroup.Text>
-            <Form.Control
-              type="number"
-              min="0"
-              placeholder="value"
-              value={Asset1?.value}
-              onChange={(event) => {
-                const newAsset1 = { ...Asset1!, value: event.target.value }
-                setAsset1(newAsset1)
-              }}
-            />
-          </InputGroup>
+          <Row>
+            <Col>
+              <InputGroup className="mb-3">
+                <Form.Control
+                  type="number"
+                  min="0"
+                  placeholder="value"
+                  value={Asset1?.value}
+                  onChange={(event) => {
+                    const newAsset1 = { ...Asset1!, value: event.target.value }
+                    setAsset1(newAsset1)
+                  }}
+                />
+              </InputGroup>
+            </Col>
+            <Col>
+              <InputGroup className="mb-3">
+                <Form.Select
+                  value={Asset1?.currency}
+                  onChange={(event) => {
+                    const newAsset1 = {
+                      ...Asset1!,
+                      currency: event.target.value,
+                      issuer: getIssuer(userBalances, event.target.value),
+                    }
+                    setAsset1(newAsset1)
+                  }}
+                >
+                  <option>Select Currency</option>
+                  {getCurrencyOptions(userBalances)}
+                </Form.Select>
+              </InputGroup>
+            </Col>
+          </Row>
         </Form.Group>
         <Form.Group
           hidden={!assets.includes(`asset2`)}
@@ -231,44 +234,40 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
           controlId="exampleForm.ControlInput1"
         >
           <Form.Label>Asset2</Form.Label>
-          <InputGroup className="mb-3">
-            <Form.Select
-              value={Asset2?.currency}
-              onChange={(event) => {
-                const newAsset2 = {
-                  ...Asset2!,
-                  currency: event.target.value,
-                  issuer: getIssuer(userBalances, event.target.value),
-                }
-                setAsset2(newAsset2)
-              }}
-            >
-              <option>Select Currency</option>
-              {getCurrencyOptions(userBalances)}
-            </Form.Select>
-          </InputGroup>
-          <InputGroup className="mb-3">
-            <InputGroup.Text>Issuer</InputGroup.Text>
-            <Form.Control
-              disabled
-              readOnly
-              type="text"
-              value={getIssuer(userBalances, Asset2?.currency)}
-            />
-          </InputGroup>
-          <InputGroup className="mb-3">
-            <InputGroup.Text>Value</InputGroup.Text>
-            <Form.Control
-              type="number"
-              min="0"
-              placeholder="value"
-              value={Asset2?.value}
-              onChange={(event) => {
-                const newAsset2 = { ...Asset2!, value: event.target.value }
-                setAsset2(newAsset2)
-              }}
-            />
-          </InputGroup>
+          <Row>
+            <Col>
+              <InputGroup className="mb-3">
+                <Form.Control
+                  type="number"
+                  min="0"
+                  placeholder="value"
+                  value={Asset2?.value}
+                  onChange={(event) => {
+                    const newAsset2 = { ...Asset2!, value: event.target.value }
+                    setAsset2(newAsset2)
+                  }}
+                />
+              </InputGroup>
+            </Col>
+            <Col>
+              <InputGroup className="mb-3">
+                <Form.Select
+                  value={Asset2?.currency}
+                  onChange={(event) => {
+                    const newAsset2 = {
+                      ...Asset2!,
+                      currency: event.target.value,
+                      issuer: getIssuer(userBalances, event.target.value),
+                    }
+                    setAsset2(newAsset2)
+                  }}
+                >
+                  <option>Select Currency</option>
+                  {getCurrencyOptions(userBalances)}
+                </Form.Select>
+              </InputGroup>
+            </Col>
+          </Row>
         </Form.Group>
         <Form.Group
           hidden={!assets.includes(`eprice`)}
@@ -277,7 +276,6 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
         >
           <Form.Label>EPrice</Form.Label>
           <InputGroup className="mb-3">
-            <InputGroup.Text>Value</InputGroup.Text>
             <Form.Control
               type="number"
               min="0"
@@ -295,49 +293,32 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
 
   const transactionCombinationNav = (): ReactElement => {
     return (
-      <Card>
-        <Card.Header>
-          <Nav
-            justify
-            variant="tabs"
-            activeKey={currentAMMTransactionCombination}
-            onSelect={(transactionType) => {
-              resetFormFields()
-              setCurrentAMMTransactionCombination(
-                transactionType as AMMTransactionCombinationsType
-              )
-            }}
-          >
-            {Array.from(AMM_TRANSACTION_COMBINATIONS).map(
-              (transactionCombo) => {
-                const formatTransactionCombo =
-                  AMM_TRANSACTION_COMBINATIONS_NAV_TITLE_MAP.get(
-                    transactionCombo
-                  )
-                return (
-                  <Nav.Item key={transactionCombo}>
-                    <Nav.Link eventKey={transactionCombo}>
-                      {formatTransactionCombo}
-                    </Nav.Link>
-                  </Nav.Item>
-                )
-              }
-            )}
-          </Nav>
-        </Card.Header>
-        <Card.Body>
-          <Card.Title>
-            {formatTransactionType(currentAMMTransactionType)} Liquidity
-          </Card.Title>
-          {showForm()}
-        </Card.Body>
-      </Card>
+      <FormGroup>
+        {Array.from(AMM_TRANSACTION_COMBINATIONS).map((transactionCombo) => {
+          const formatTransactionCombo =
+            AMM_TRANSACTION_COMBINATIONS_NAV_TITLE_MAP.get(transactionCombo)
+          return (
+            <Form.Check
+              key={transactionCombo}
+              type="radio"
+              checked={transactionCombo === currentAMMTransactionCombination}
+              value={transactionCombo}
+              onChange={(event) => {
+                console.log(event.target.value)
+                // @ts-expect-error
+                setCurrentAMMTransactionCombination(event.target.value)
+              }}
+              label={formatTransactionCombo}
+            />
+          )
+        })}
+      </FormGroup>
     )
   }
 
   return (
     <Modal
-      size="xl"
+      size="lg"
       show={show}
       onEscapeKeyDown={handleCloseButtonClick}
       aria-labelledby="contained-modal-title-vcenter"
@@ -345,13 +326,16 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
       {/* @ts-expect-error */}
       <Modal.Header closeButton onHide={handleCloseButtonClick}>
         <Modal.Title id="contained-modal-title-vcenter">
-          Deposit/Withdraw Liquidity
+          Change Liquidity
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="show-grid">
+        <Row>
+          <Col>{transactionTypeNav()}</Col>
+          <Col>{transactionCombinationNav()}</Col>
+        </Row>
+        {showForm()}
         <ShowPool poolBalance={poolBalance} />
-        {transactionTypeNav()}
-        {transactionCombinationNav()}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleCloseButtonClick}>
