@@ -35,10 +35,5 @@ export const Transactions: React.FC<{}> = () => {
     })
   }
 
-  return (
-    <div className="transactions-screen">
-      <h1>Transactions screen!</h1>
-      {showTransactions()}
-    </div>
-  )
+  return <div className="transactions-screen">{showTransactions()}</div>
 }
