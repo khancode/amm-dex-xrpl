@@ -6,14 +6,18 @@ import './ShowPool.scss'
 
 interface ShowPoolProps {
   poolBalance: PoolBalance
+  className?: string
   onPlusMinusLiquidityButtonClick?: (poolBalance: PoolBalance) => void
   onVoteButtonClick?: (poolBalance: PoolBalance) => void
+  isPreview?: boolean
 }
 
 export const ShowPool: React.FC<ShowPoolProps> = ({
   poolBalance,
+  className,
   onPlusMinusLiquidityButtonClick,
   onVoteButtonClick,
+  isPreview = false,
 }: ShowPoolProps) => {
   const { AMMID, Asset1, Asset2, LPToken } = poolBalance
   const asset1Currency = typeof Asset1 === `string` ? `XRP` : Asset1.currency
@@ -33,10 +37,12 @@ export const ShowPool: React.FC<ShowPoolProps> = ({
     LPToken.currency
   })`
   return (
-    <Card className="show-pool">
+    <Card className={`show-pool ${className ?? ``}`}>
       <Card.Header>
         <div className="row">
-          <div className="col">{LPTokenDetails}</div>
+          <div className="col">
+            {isPreview ? `Preview of AMM Instance Result` : LPTokenDetails}
+          </div>
           <Button
             hidden={onVoteButtonClick == null}
             variant="outline-primary"

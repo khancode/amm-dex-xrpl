@@ -1,11 +1,14 @@
 import React, { ReactElement, useEffect, useState } from 'react'
-import { Spinner } from 'react-bootstrap'
+import { Col, Row, Spinner } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 import Container from 'react-bootstrap/Container'
 import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
 import Modal from 'react-bootstrap/Modal'
+
 import { UserBalancesResponse } from '../../util/apiModels'
+import { ShowPool } from '../ShowPool'
+import './CreatePoolModal.scss'
 
 interface CreatePoolModalProps {
   show: boolean
@@ -35,6 +38,24 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
   const [asset2Currency, setAsset2Currency] = useState<string>(``)
   const [asset2Value, setAsset2Value] = useState<string>(``)
   const [tradingFee, setTradingFee] = useState<number>(0)
+  const [previewPoolBalance, setPreviewPoolBalance] = useState<any>({
+    AMMID: `preview`,
+    Asset1: {
+      currency: ``,
+      issuer: ``,
+      value: ``,
+    },
+    Asset2: {
+      currency: ``,
+      issuer: ``,
+      value: ``,
+    },
+    LPToken: {
+      currency: ``,
+      issuer: ``,
+      value: ``,
+    },
+  })
 
   useEffect(() => {
     if (!show) {
@@ -117,67 +138,89 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
           <Form>
             <Form.Group className="mb-3" controlId="form.asset1">
               <Form.Label>Asset 1</Form.Label>
-              <InputGroup className="mb-3">
-                <InputGroup.Text>Currency</InputGroup.Text>
-                <Form.Select
-                  value={asset1Currency}
-                  onChange={(event) => setAsset1Currency(event.target.value)}
-                >
-                  <option>Select Currency</option>
-                  {getCurrencyOptions()}
-                </Form.Select>
-              </InputGroup>
-              <InputGroup className="mb-3">
-                <InputGroup.Text>Issuer</InputGroup.Text>
-                <Form.Control
-                  disabled
-                  readOnly
-                  type="text"
-                  value={getIssuer(asset1Currency)}
-                />
-              </InputGroup>
-              <InputGroup className="mb-3">
-                <InputGroup.Text>Value</InputGroup.Text>
-                <Form.Control
-                  type="number"
-                  min="0"
-                  placeholder="value"
-                  value={asset1Value}
-                  onChange={(event) => setAsset1Value(event.target.value)}
-                />
-              </InputGroup>
+              <Row>
+                <Col>
+                  <InputGroup className="mb-3">
+                    <Form.Control
+                      type="number"
+                      min="0"
+                      placeholder="Value"
+                      value={asset1Value}
+                      onChange={(event) => {
+                        const asset1Value = event.target.value
+                        setAsset1Value(asset1Value)
+                        const newpreviewPoolBalance = {
+                          ...previewPoolBalance,
+                        }
+                        newpreviewPoolBalance.Asset1.value = asset1Value
+                        setPreviewPoolBalance(newpreviewPoolBalance)
+                      }}
+                    />
+                  </InputGroup>
+                </Col>
+                <Col>
+                  <InputGroup className="mb-3">
+                    <Form.Select
+                      value={asset1Currency}
+                      onChange={(event) => {
+                        const asset1Currency = event.target.value
+                        setAsset1Currency(asset1Currency)
+                        const newpreviewPoolBalance = {
+                          ...previewPoolBalance,
+                        }
+                        newpreviewPoolBalance.Asset1.currency = asset1Currency
+                        setPreviewPoolBalance(newpreviewPoolBalance)
+                      }}
+                    >
+                      <option>Select Currency</option>
+                      {getCurrencyOptions()}
+                    </Form.Select>
+                  </InputGroup>
+                </Col>
+              </Row>
             </Form.Group>
             <Form.Group className="mb-3" controlId="form.asset2">
               <Form.Label>Asset 2</Form.Label>
-              <InputGroup className="mb-3">
-                <InputGroup.Text>Currency</InputGroup.Text>
-                <Form.Select
-                  value={asset2Currency}
-                  onChange={(event) => setAsset2Currency(event.target.value)}
-                >
-                  <option>Select Currency</option>
-                  {getCurrencyOptions()}
-                </Form.Select>
-              </InputGroup>
-              <InputGroup className="mb-3">
-                <InputGroup.Text>Issuer</InputGroup.Text>
-                <Form.Control
-                  disabled
-                  readOnly
-                  type="text"
-                  value={getIssuer(asset2Currency)}
-                />
-              </InputGroup>
-              <InputGroup className="mb-3">
-                <InputGroup.Text>Value</InputGroup.Text>
-                <Form.Control
-                  type="number"
-                  min="0"
-                  placeholder="value"
-                  value={asset2Value}
-                  onChange={(event) => setAsset2Value(event.target.value)}
-                />
-              </InputGroup>
+              <Row>
+                <Col>
+                  <InputGroup className="mb-3">
+                    <Form.Control
+                      type="number"
+                      min="0"
+                      placeholder="Value"
+                      value={asset2Value}
+                      onChange={(event) => {
+                        const asset2Value = event.target.value
+                        setAsset2Value(asset2Value)
+                        const newpreviewPoolBalance = {
+                          ...previewPoolBalance,
+                        }
+                        newpreviewPoolBalance.Asset2.value = asset2Value
+                        setPreviewPoolBalance(newpreviewPoolBalance)
+                      }}
+                    />
+                  </InputGroup>
+                </Col>
+                <Col>
+                  <InputGroup className="mb-3">
+                    <Form.Select
+                      value={asset2Currency}
+                      onChange={(event) => {
+                        const asset2Currency = event.target.value
+                        setAsset2Currency(asset2Currency)
+                        const newpreviewPoolBalance = {
+                          ...previewPoolBalance,
+                        }
+                        newpreviewPoolBalance.Asset2.currency = asset2Currency
+                        setPreviewPoolBalance(newpreviewPoolBalance)
+                      }}
+                    >
+                      <option>Select Currency</option>
+                      {getCurrencyOptions()}
+                    </Form.Select>
+                  </InputGroup>
+                </Col>
+              </Row>
             </Form.Group>
             <Form.Group className="mb-3" controlId="form.tradingFee">
               <Form.Label>Trading Fee</Form.Label>
@@ -195,6 +238,11 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
               </InputGroup>
             </Form.Group>
           </Form>
+          <ShowPool
+            className="preview-pool-balance"
+            isPreview
+            poolBalance={previewPoolBalance}
+          />
         </Container>
       </Modal.Body>
       <Modal.Footer>
