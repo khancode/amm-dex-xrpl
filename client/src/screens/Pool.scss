@@ -5,4 +5,14 @@
   gap: 25px;
   margin: 0 auto;
   width: 886px;
+
+  .pool-type-title-row {
+    margin-bottom: 15px;
+
+    .create-pool-button-col {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+  }
 }

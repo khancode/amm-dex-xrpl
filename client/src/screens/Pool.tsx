@@ -1,5 +1,5 @@
 import React, { ReactElement, useContext, useEffect, useState } from 'react'
-import { Table } from 'react-bootstrap'
+import { Col, Row, Table } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 
 import { UserContext } from '../components/layout/Page'
@@ -266,13 +266,23 @@ export const Pool: React.FC<{}> = () => {
         <h2>Balances</h2>
         <div>{myBalances()}</div>
       </div>
-      <Button onClick={toggleCreatePoolModal}>+ Create Pool</Button>
       <div>
-        <h2>My Positions</h2>
+        <Row className="pool-type-title-row">
+          <Col>
+            <h2>My Positions</h2>
+          </Col>
+          <Col className="create-pool-button-col">
+            <Button onClick={toggleCreatePoolModal}>+ Create Pool</Button>
+          </Col>
+        </Row>
         <div>{showPools(userPoolsBalances)}</div>
       </div>
       <div>
-        <h2>Available Pools</h2>
+        <Row className="pool-type-title-row">
+          <Col>
+            <h2>Available Pools</h2>
+          </Col>
+        </Row>
         <div>{showPools(otherPoolsBalances)}</div>
       </div>
 
