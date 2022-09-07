@@ -208,7 +208,9 @@ export const Swap: React.FC<{}> = () => {
               </Row>
             </Form.Group>
 
-            <div>{currencyExchangeInfo?.exchangeRate}</div>
+            <div className="exchange-rate">
+              {currencyExchangeInfo?.exchangeRate}
+            </div>
 
             <Button className="swap-button" onClick={handleSwap}>
               Swap
