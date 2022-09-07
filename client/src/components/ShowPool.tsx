@@ -34,14 +34,25 @@ export const ShowPool: React.FC<ShowPoolProps> = ({
   const asset1Label = `${asset1Value.toLocaleString()} ${asset1Currency}`
   const asset2Label = `${asset2Value.toLocaleString()} ${asset2Currency}`
   const LPTokenDetails = `${Number(LPToken.value).toLocaleString()} LPToken (${
-    LPToken.currency
+    LPToken.currency.substring(0, 5) +
+    `...` +
+    LPToken.currency.substring(35, 40)
   })`
   return (
     <Card className={`show-pool ${className ?? ``}`}>
       <Card.Header>
         <div className="row">
           <div className="col">
-            {isPreview ? `AMM Instance Preview` : LPTokenDetails}
+            {isPreview ? (
+              `AMM Instance Preview`
+            ) : (
+              <div>
+                <b>
+                  AMMID: {AMMID.substring(0, 5)}...{AMMID.substring(59, 63)}
+                </b>
+                <div>{LPTokenDetails}</div>
+              </div>
+            )}
           </div>
           <Button
             hidden={onVoteButtonClick == null}
