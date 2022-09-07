@@ -1,10 +1,11 @@
 import React, { ChangeEvent, ReactElement, useEffect, useState } from 'react'
-import { Form, Spinner } from 'react-bootstrap'
+import { Form, FormGroup, Spinner, Table } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 
 import { PoolBalance } from '../../util/apiModels'
 import { ShowPool } from '../ShowPool'
+import './VoteModal.scss'
 
 const MAX_FEE_VAL = 65000
 
@@ -49,15 +50,24 @@ export const VoteModal: React.FC<VoteModalProps> = ({
     setFeeVal(validateFee.toString())
   }
 
+  const formatTradingFeeToPercent = (tradingFee: number): string => {
+    return `${tradingFee * 0.001}%`
+  }
+
   const showFeeValForm = (): ReactElement => {
     return (
-      <Form.Control
-        type="number"
-        min="0"
-        placeholder="Number between 0 to 65000"
-        value={feeVal}
-        onChange={handleFeeValChange}
-      />
+      <FormGroup>
+        <Form.Label>
+          <b>Vote on a new Trading Fee</b>
+        </Form.Label>
+        <Form.Control
+          type="number"
+          min="0"
+          placeholder="Number between 0 to 65000"
+          value={feeVal}
+          onChange={handleFeeValChange}
+        />
+      </FormGroup>
     )
   }
 
@@ -69,21 +79,34 @@ export const VoteModal: React.FC<VoteModalProps> = ({
     // Sort VoteSlots by weight in descending order
     poolBalance.VoteSlots.sort((a, b) => b.VoteWeight - a.VoteWeight)
 
-    return poolBalance.VoteSlots.map(({ FeeVal, VoteWeight }, index) => {
-      const voteRank = index + 1
-      return (
-        <div key={`${FeeVal}_${VoteWeight}`}>
-          <div>
-            {voteRank}. FeeVal: {FeeVal}, VoteWeight: {VoteWeight}
-          </div>
-        </div>
-      )
-    })
+    return (
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>FeeVal</th>
+            <th>VoteWeight</th>
+          </tr>
+        </thead>
+        <tbody>
+          {poolBalance.VoteSlots.map(({ FeeVal, VoteWeight }, index) => {
+            const voteRank = index + 1
+            return (
+              <tr key={`${FeeVal}_${VoteWeight}`}>
+                <td>{voteRank}</td>
+                <td>{formatTradingFeeToPercent(FeeVal)}</td>
+                <td>{VoteWeight}</td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </Table>
+    )
   }
 
   return (
     <Modal
-      size="xl"
+      size="lg"
       show={show}
       onEscapeKeyDown={handleCloseButtonClick}
       aria-labelledby="contained-modal-title-vcenter"
@@ -96,9 +119,16 @@ export const VoteModal: React.FC<VoteModalProps> = ({
       </Modal.Header>
       <Modal.Body className="show-grid">
         <ShowPool poolBalance={poolBalance} />
-        <div>Current Trading Fee: {poolBalance?.TradingFee}</div>
-        {showFeeValForm()}
+        <h5>
+          Current Trading Fee:{` `}
+          {formatTradingFeeToPercent(poolBalance?.TradingFee)}
+        </h5>
         {showVotes()}
+        <div className="show-fee-val-form">{showFeeValForm()}</div>
+        <div>
+          TradingFee in percent{` `}
+          <b>{formatTradingFeeToPercent(Number(feeVal))}</b>
+        </div>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleCloseButtonClick}>
