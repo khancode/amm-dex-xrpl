@@ -50,18 +50,18 @@ export const USERS: MATRIX_USER[] = [
 ]
 
 export const POOLS: MATRIX_POOL[] = [
-  {
-    username: `khancode`,
-    asset1: {
-      currency: XRP,
-      value: `1000`,
-    },
-    asset2: {
-      currency: ETH,
-      value: `1000`,
-    },
-    tradingFee: 0,
-  },
+  // {
+  //   username: `khancode`,
+  //   asset1: {
+  //     currency: XRP,
+  //     value: `1000`,
+  //   },
+  //   asset2: {
+  //     currency: ETH,
+  //     value: `1000`,
+  //   },
+  //   tradingFee: 0,
+  // },
   {
     username: `satoshi`,
     asset1: {

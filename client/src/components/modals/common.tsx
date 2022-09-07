@@ -2,6 +2,8 @@ import React, { ReactElement } from 'react'
 
 import { UserBalancesResponse } from '../../util/apiModels'
 
+export const MAX_FEE_VAL = 65000
+
 export const getCurrencyOptions = (
   userBalances: UserBalancesResponse
 ): ReactElement[] => {
@@ -25,4 +27,8 @@ export const getIssuer = (
     }
   }
   return ``
+}
+
+export const formatTradingFeeToPercent = (tradingFee: number): string => {
+  return `${tradingFee * 0.001}%`
 }

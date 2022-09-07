@@ -1,5 +1,14 @@
 import React, { ChangeEvent, useContext, useEffect, useState } from 'react'
-import { Button, Card, Col, Form, InputGroup, Row } from 'react-bootstrap'
+import {
+  Button,
+  Card,
+  Col,
+  Form,
+  InputGroup,
+  Row,
+  Spinner,
+  Toast,
+} from 'react-bootstrap'
 import { BsArrowDownCircle } from 'react-icons/bs'
 
 import { UserContext } from '../components/layout/Page'
@@ -20,7 +29,12 @@ export const Swap: React.FC<{}> = () => {
   const { user, loading } = useContext(UserContext)
   const [userBalances, setUserBalances] = useState<UserBalancesResponse>()
   const [currencyExchangeInfo, setCurrencyExchangeInfo] =
-    useState<GetCurrencyExchangeInfoResponse>()
+    useState<GetCurrencyExchangeInfoResponse | null>(null)
+  const [showLoadingIndicator, setShowLoadingIndicator] =
+    useState<boolean>(false)
+  const [showToast, setShowToast] = useState<boolean>(false)
+  const [toastHeader, setToastHeader] = useState<string>(``)
+  const [toastBody, setToastBody] = useState<string>(``)
 
   const [swapAsset, setSwapAsset] = useState<CurrencyIssuerValue>({
     currency: ``,
@@ -40,6 +54,20 @@ export const Swap: React.FC<{}> = () => {
       })
     }
   }, [loading])
+
+  const resetFormFields = (): void => {
+    setSwapAsset({
+      currency: ``,
+      issuer: ``,
+      value: ``,
+    })
+    setWithAsset({
+      currency: ``,
+      issuer: ``,
+      value: ``,
+    })
+    setCurrencyExchangeInfo(null)
+  }
 
   const handleSwapAssetCurrencyChange = (
     event: ChangeEvent<HTMLSelectElement>
@@ -128,6 +156,8 @@ export const Swap: React.FC<{}> = () => {
       throw Error(`currencyExchangeInfo is undefined`)
     }
 
+    setShowLoadingIndicator(true)
+
     swapAssetsDepositWithdraw(
       user?.user.username,
       currencyExchangeInfo?.poolBalance.AMMID,
@@ -141,11 +171,32 @@ export const Swap: React.FC<{}> = () => {
           4
         )}`
       )
+      setShowLoadingIndicator(false)
+      resetFormFields()
+      setToastHeader(
+        `Swapped ${swapAsset.currency} with ${withAsset.currency}!`
+      )
+      setToastBody(`Check Transactions for more info!`)
+      toggleShowToast()
     })
+  }
+
+  const toggleShowToast = (): void => {
+    setShowToast(!showToast)
   }
 
   return (
     <div className="swap-screen">
+      <Toast className="swap-toast" show={showToast} onClose={toggleShowToast}>
+        <Toast.Header>
+          {/* <img src="holder.js/20x20?text=%20" className="rounded me-2" alt="" /> */}
+          <strong className="me-auto">
+            <b>{toastHeader}</b>
+          </strong>
+        </Toast.Header>
+        <Toast.Body>{toastBody}</Toast.Body>
+      </Toast>
+
       <Card className="swap-card">
         <Card.Header>
           <Card.Title>Swap</Card.Title>
@@ -162,6 +213,7 @@ export const Swap: React.FC<{}> = () => {
                       placeholder="0.0"
                       value={swapAsset?.value}
                       onChange={handleSwapAssetValueChange}
+                      disabled={showLoadingIndicator}
                     />
                   </InputGroup>
                 </Col>
@@ -170,6 +222,7 @@ export const Swap: React.FC<{}> = () => {
                     <Form.Select
                       value={swapAsset?.currency}
                       onChange={handleSwapAssetCurrencyChange}
+                      disabled={showLoadingIndicator}
                     >
                       <option>Select Currency</option>
                       {getCurrencyOptions(userBalances!)}
@@ -191,6 +244,7 @@ export const Swap: React.FC<{}> = () => {
                       placeholder="0.0"
                       value={withAsset?.value}
                       onChange={handleWithAssetValueChange}
+                      disabled={showLoadingIndicator}
                     />
                   </InputGroup>
                 </Col>
@@ -199,6 +253,7 @@ export const Swap: React.FC<{}> = () => {
                     <Form.Select
                       value={withAsset?.currency}
                       onChange={handleWithAssetCurrencyChange}
+                      disabled={showLoadingIndicator}
                     >
                       <option>Select Currency</option>
                       {getCurrencyOptions(userBalances!)}
@@ -208,12 +263,28 @@ export const Swap: React.FC<{}> = () => {
               </Row>
             </Form.Group>
 
-            <div className="exchange-rate">
-              {currencyExchangeInfo?.exchangeRate}
-            </div>
+            {currencyExchangeInfo != null && (
+              <div className="exchange-rate">
+                {currencyExchangeInfo.exchangeRate}
+              </div>
+            )}
 
-            <Button className="swap-button" onClick={handleSwap}>
-              Swap
+            <Button
+              className="swap-button"
+              onClick={handleSwap}
+              disabled={showLoadingIndicator}
+            >
+              {showLoadingIndicator && (
+                <Spinner
+                  className="create-button-spinner"
+                  as="span"
+                  animation="grow"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                />
+              )}
+              {showLoadingIndicator ? `Submitting...` : `Swap`}
             </Button>
           </Form>
         </Card.Body>

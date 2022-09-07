@@ -5,9 +5,8 @@ import Modal from 'react-bootstrap/Modal'
 
 import { PoolBalance } from '../../util/apiModels'
 import { ShowPool } from '../ShowPool'
+import { formatTradingFeeToPercent, MAX_FEE_VAL } from './common'
 import './VoteModal.scss'
-
-const MAX_FEE_VAL = 65000
 
 interface VoteModalProps {
   show: boolean
@@ -50,15 +49,14 @@ export const VoteModal: React.FC<VoteModalProps> = ({
     setFeeVal(validateFee.toString())
   }
 
-  const formatTradingFeeToPercent = (tradingFee: number): string => {
-    return `${tradingFee * 0.001}%`
-  }
-
   const showFeeValForm = (): ReactElement => {
     return (
       <FormGroup>
         <Form.Label>
-          <b>Vote on a new Trading Fee</b>
+          <b>
+            Vote on a new Trading Fee{` `}
+            {formatTradingFeeToPercent(Number(feeVal))}
+          </b>
         </Form.Label>
         <Form.Control
           type="number"
@@ -66,6 +64,7 @@ export const VoteModal: React.FC<VoteModalProps> = ({
           placeholder="Number between 0 to 65000"
           value={feeVal}
           onChange={handleFeeValChange}
+          disabled={showLoadingIndicator}
         />
       </FormGroup>
     )
@@ -125,12 +124,18 @@ export const VoteModal: React.FC<VoteModalProps> = ({
         </h5>
         {showVotes()}
         <div className="show-fee-val-form">{showFeeValForm()}</div>
-        <div>
-          TradingFee in percent{` `}
-          <b>{formatTradingFeeToPercent(Number(feeVal))}</b>
-        </div>
       </Modal.Body>
       <Modal.Footer>
+        <div className="loading-container" hidden={!showLoadingIndicator}>
+          <Spinner
+            as="span"
+            animation="border"
+            size="sm"
+            role="status"
+            aria-hidden="true"
+          />
+          <h4>Submitting Vote...</h4>
+        </div>
         <Button variant="secondary" onClick={handleCloseButtonClick}>
           Nah
         </Button>

@@ -1,6 +1,13 @@
 .swap-screen {
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
+
+  .swap-toast {
+    margin: 0 auto;
+    margin-bottom: 35px;
+  }
 
   .swap-card {
     width: 500px;

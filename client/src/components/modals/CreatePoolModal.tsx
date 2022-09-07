@@ -8,6 +8,7 @@ import Modal from 'react-bootstrap/Modal'
 
 import { UserBalancesResponse } from '../../util/apiModels'
 import { ShowPool } from '../ShowPool'
+import { formatTradingFeeToPercent, MAX_FEE_VAL } from './common'
 import './CreatePoolModal.scss'
 
 interface CreatePoolModalProps {
@@ -37,7 +38,7 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
   const [asset1Value, setAsset1Value] = useState<string>(``)
   const [asset2Currency, setAsset2Currency] = useState<string>(``)
   const [asset2Value, setAsset2Value] = useState<string>(``)
-  const [tradingFee, setTradingFee] = useState<number>(0)
+  const [tradingFee, setTradingFee] = useState<string>(``)
   const [previewPoolBalance, setPreviewPoolBalance] = useState<any>({
     AMMID: `preview`,
     Asset1: {
@@ -68,7 +69,7 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
     setAsset1Value(``)
     setAsset2Currency(``)
     setAsset2Value(``)
-    setTradingFee(0)
+    setTradingFee(``)
   }
 
   const getCurrencyOptions = (): ReactElement[] => {
@@ -117,7 +118,7 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
       asset2Currency,
       getIssuer(asset2Currency),
       asset2Value,
-      tradingFee
+      Number(tradingFee)
     )
   }
 
@@ -155,6 +156,7 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
                         newpreviewPoolBalance.Asset1.value = asset1Value
                         setPreviewPoolBalance(newpreviewPoolBalance)
                       }}
+                      disabled={showLoadingIndicator}
                     />
                   </InputGroup>
                 </Col>
@@ -171,6 +173,7 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
                         newpreviewPoolBalance.Asset1.currency = asset1Currency
                         setPreviewPoolBalance(newpreviewPoolBalance)
                       }}
+                      disabled={showLoadingIndicator}
                     >
                       <option>Select Currency</option>
                       {getCurrencyOptions()}
@@ -198,6 +201,7 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
                         newpreviewPoolBalance.Asset2.value = asset2Value
                         setPreviewPoolBalance(newpreviewPoolBalance)
                       }}
+                      disabled={showLoadingIndicator}
                     />
                   </InputGroup>
                 </Col>
@@ -214,6 +218,7 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
                         newpreviewPoolBalance.Asset2.currency = asset2Currency
                         setPreviewPoolBalance(newpreviewPoolBalance)
                       }}
+                      disabled={showLoadingIndicator}
                     >
                       <option>Select Currency</option>
                       {getCurrencyOptions()}
@@ -223,17 +228,23 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
               </Row>
             </Form.Group>
             <Form.Group className="mb-3" controlId="form.tradingFee">
-              <Form.Label>Trading Fee</Form.Label>
+              <Form.Label>
+                Trading Fee{` `}
+                {formatTradingFeeToPercent(Number(tradingFee))}
+              </Form.Label>
               <InputGroup className="mb-3">
-                <InputGroup.Text>Value</InputGroup.Text>
                 <Form.Control
                   type="number"
                   min="0"
-                  placeholder="value"
+                  placeholder="Number between 0 to 65000"
                   value={tradingFee}
-                  onChange={(event) =>
-                    setTradingFee(Number(event.target.value))
-                  }
+                  onChange={(event) => {
+                    const newFee = Number(event.target.value)
+                    const validateFee =
+                      newFee > MAX_FEE_VAL ? MAX_FEE_VAL : newFee
+                    setTradingFee(validateFee.toString())
+                  }}
+                  disabled={showLoadingIndicator}
                 />
               </InputGroup>
             </Form.Group>
@@ -246,6 +257,16 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
         </Container>
       </Modal.Body>
       <Modal.Footer>
+        <div className="loading-container" hidden={!showLoadingIndicator}>
+          <Spinner
+            as="span"
+            animation="border"
+            size="sm"
+            role="status"
+            aria-hidden="true"
+          />
+          <h4>Creating AMM Instance...</h4>
+        </div>
         <Button variant="secondary" onClick={handleCloseButtonClick}>
           Nah
         </Button>
@@ -256,6 +277,7 @@ export const CreatePoolModal: React.FC<CreatePoolModalProps> = ({
         >
           {showLoadingIndicator && (
             <Spinner
+              className="create-button-spinner"
               as="span"
               animation="grow"
               size="sm"

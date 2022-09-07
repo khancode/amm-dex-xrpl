@@ -1,5 +1,5 @@
 import React, { ReactElement, useContext, useEffect, useState } from 'react'
-import { Col, Row, Table } from 'react-bootstrap'
+import { Col, Row, Table, Toast } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
 
 import { UserContext } from '../components/layout/Page'
@@ -35,6 +35,9 @@ export const Pool: React.FC<{}> = () => {
   const [liquidityPoolSelected, setLiquidityPoolSelected] =
     useState<PoolBalance>()
   const [showCreatePoolModal, setShowCreatePoolModal] = useState<boolean>(false) // DEV: set to true to immediately open modal
+  const [showToast, setShowToast] = useState<boolean>(false)
+  const [toastHeader, setToastHeader] = useState<string>(``)
+  const [toastBody, setToastBody] = useState<string>(``)
   const [showChangeLiquidityModal, setShowChangeLiquidityModal] =
     useState<boolean>(false)
   const [showVoteModal, setShowVoteModal] = useState<boolean>(false)
@@ -61,6 +64,10 @@ export const Pool: React.FC<{}> = () => {
 
   const toggleCreatePoolModal = (): void => {
     setShowCreatePoolModal(!showCreatePoolModal)
+  }
+
+  const toggleShowToast = (): void => {
+    setShowToast(!showToast)
   }
 
   const toggleChangeLiquidityModal = (): void => {
@@ -98,6 +105,9 @@ export const Pool: React.FC<{}> = () => {
         setUserBalances(userBalancesResponse)
         setShowLoadingIndicator(false)
         toggleCreatePoolModal()
+        setToastHeader(`Created new AMM Instance!`)
+        setToastBody(`Check Transactions for more info!`)
+        toggleShowToast()
       })
       getUserPoolsBalances(user?.user.username).then(
         (getUserPoolsBalancesResponse) => {
@@ -135,6 +145,9 @@ export const Pool: React.FC<{}> = () => {
           setUserBalances(userBalancesResponse)
           setShowLoadingIndicator(false)
           toggleChangeLiquidityModal()
+          setToastHeader(`AMM Deposit placed!`)
+          setToastBody(`Check Transactions for more info!`)
+          toggleShowToast()
         })
         getUserPoolsBalances(user?.user.username).then(
           (getUserPoolsBalancesResponse) => {
@@ -160,6 +173,9 @@ export const Pool: React.FC<{}> = () => {
           setUserBalances(userBalancesResponse)
           setShowLoadingIndicator(false)
           toggleChangeLiquidityModal()
+          setToastHeader(`AMM Withdraw placed!`)
+          setToastBody(`Check Transactions for more info!`)
+          toggleShowToast()
         })
         getUserPoolsBalances(user?.user.username).then(
           (getUserPoolsBalancesResponse) => {
@@ -178,7 +194,6 @@ export const Pool: React.FC<{}> = () => {
   const onVoteSubmit = (AMMID: string, FeeVal: number): void => {
     setShowLoadingIndicator(true)
 
-    // TODO: implement API route
     vote(user?.user.username, AMMID, FeeVal).then((voteResponse) => {
       console.log(`voteResponse - down below:`)
       console.log(voteResponse)
@@ -186,6 +201,9 @@ export const Pool: React.FC<{}> = () => {
         setUserBalances(userBalancesResponse)
         setShowLoadingIndicator(false)
         toggleVoteModal()
+        setToastHeader(`Submitted Vote!`)
+        setToastBody(`Check Transactions for more info!`)
+        toggleShowToast()
       })
       getUserPoolsBalances(user?.user.username).then(
         (getUserPoolsBalancesResponse) => {
@@ -262,6 +280,16 @@ export const Pool: React.FC<{}> = () => {
 
   return (
     <div className="pool-screen">
+      <Toast className="pool-toast" show={showToast} onClose={toggleShowToast}>
+        <Toast.Header>
+          {/* <img src="holder.js/20x20?text=%20" className="rounded me-2" alt="" /> */}
+          <strong className="me-auto">
+            <b>{toastHeader}</b>
+          </strong>
+        </Toast.Header>
+        <Toast.Body>{toastBody}</Toast.Body>
+      </Toast>
+
       <div>
         <h2>Balances</h2>
         <div>{myBalances()}</div>

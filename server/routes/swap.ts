@@ -102,7 +102,7 @@ router.post('/spotprice', async (req: Request, res: Response) => {
 
     const spotPrice = ((Rb^Wb) / (Ra^Wa)) * (1 / (1 - tradingFeePercentage))
     const exchangeRate =
-        `1 ${typeof swapAssetSelected === `string` ? `XRP` : swapAssetSelected.currency} = ${spotPrice} ${typeof withAssetSelected === `string` ? `XRP` : withAssetSelected.currency}`
+        `1 ${typeof swapAssetSelected === `string` ? `XRP` : swapAssetSelected.currency} ≈ ${spotPrice.toFixed(6)} ${typeof withAssetSelected === `string` ? `XRP` : withAssetSelected.currency}`
 
     res.status(200).json({
         spotPrice,
@@ -139,13 +139,16 @@ router.post('/depositwithdraw', async (req: Request, res: Response) => {
 
     const slippagePercentage = 0.05
     const updateWithAsset = { ...withAsset }
-    updateWithAsset.value = updateWithAsset.value * (1 - slippagePercentage)
+    updateWithAsset.value = (updateWithAsset.value * (1 - slippagePercentage)).toFixed(2)
+
+    console.log(`yooooooo`)
+    console.log(`updateWithAsset: ${JSON.stringify(updateWithAsset, null, 4)}`)
 
     const withdrawResult = await ammWithdraw(
         user.wallet.seed,
         AMMID,
         omitAsset,
-        withAsset,
+        updateWithAsset,
         omitAsset,
         ``
     )

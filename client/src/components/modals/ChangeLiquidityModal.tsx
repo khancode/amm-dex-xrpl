@@ -135,13 +135,17 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
         variant="pills"
         activeKey={currentAMMTransactionType}
         onSelect={(transactionType) => {
+          resetFormFields()
           setCurrentAMMTransactionType(transactionType as AMMTransactionType)
         }}
       >
         {Array.from(AMM_TRANSACTION_TYPES).map((transactionType) => {
           return (
             <Nav.Item key={transactionType}>
-              <Nav.Link eventKey={transactionType}>
+              <Nav.Link
+                eventKey={transactionType}
+                disabled={showLoadingIndicator}
+              >
                 {formatTransactionType(transactionType)}
               </Nav.Link>
             </Nav.Item>
@@ -196,6 +200,7 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
                           Number(LPTokenValue)
                     setPreviewPoolBalance(newPreviewPoolBalance)
                   }}
+                  disabled={showLoadingIndicator}
                 />
               </InputGroup>
             </Col>
@@ -211,6 +216,7 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
                     }
                     setLPToken(newLPToken)
                   }}
+                  disabled={showLoadingIndicator}
                 >
                   <option>Select Currency</option>
                   {getCurrencyOptions(userBalances)}
@@ -258,6 +264,7 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
                           Number(asset1Value)
                     setPreviewPoolBalance(newPreviewPoolBalance)
                   }}
+                  disabled={showLoadingIndicator}
                 />
               </InputGroup>
             </Col>
@@ -273,6 +280,7 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
                     }
                     setAsset1(newAsset1)
                   }}
+                  disabled={showLoadingIndicator}
                 >
                   <option>Select Currency</option>
                   {getCurrencyOptions(userBalances)}
@@ -320,6 +328,7 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
                           Number(asset2Value)
                     setPreviewPoolBalance(newPreviewPoolBalance)
                   }}
+                  disabled={showLoadingIndicator}
                 />
               </InputGroup>
             </Col>
@@ -335,6 +344,7 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
                     }
                     setAsset2(newAsset2)
                   }}
+                  disabled={showLoadingIndicator}
                 >
                   <option>Select Currency</option>
                   {getCurrencyOptions(userBalances)}
@@ -358,6 +368,7 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
               onChange={(event) => {
                 setEPriceValue(event.target.value)
               }}
+              disabled={showLoadingIndicator}
             />
           </InputGroup>
         </Form.Group>
@@ -382,6 +393,7 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
                 setCurrentAMMTransactionCombination(event.target.value)
                 resetFormFields()
               }}
+              disabled={showLoadingIndicator}
               label={formatTransactionCombo}
             />
           )
@@ -414,6 +426,18 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
         )}
       </Modal.Body>
       <Modal.Footer>
+        <div className="loading-container" hidden={!showLoadingIndicator}>
+          <Spinner
+            as="span"
+            animation="border"
+            size="sm"
+            role="status"
+            aria-hidden="true"
+          />
+          <h4>
+            Submitting a {formatTransactionType(currentAMMTransactionType)}...
+          </h4>
+        </div>
         <Button variant="secondary" onClick={handleCloseButtonClick}>
           Nah
         </Button>
