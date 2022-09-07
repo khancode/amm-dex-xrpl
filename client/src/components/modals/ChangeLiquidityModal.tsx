@@ -79,6 +79,7 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
   const [Asset1, setAsset1] = useState<CurrencyIssuerValue | null>(null)
   const [Asset2, setAsset2] = useState<CurrencyIssuerValue | null>(null)
   const [EPriceValue, setEPriceValue] = useState<string>(``)
+  const [previewPoolBalance, setPreviewPoolBalance] = useState<any>()
 
   useEffect(() => {
     if (!show) {
@@ -86,11 +87,23 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
     }
   }, [show])
 
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+    if (poolBalance) {
+      // Deep copy poolBalance
+      setPreviewPoolBalance(JSON.parse(JSON.stringify(poolBalance)))
+    }
+  }, [poolBalance])
+
   const resetFormFields = (): void => {
     setLPToken({ currency: ``, issuer: ``, value: `` })
     setAsset1({ currency: ``, issuer: ``, value: `` })
     setAsset2({ currency: ``, issuer: ``, value: `` })
     setEPriceValue(``)
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+    if (poolBalance) {
+      setPreviewPoolBalance(JSON.parse(JSON.stringify(poolBalance)))
+    }
   }
 
   const handleCloseButtonClick = async (event: any): Promise<void> => {
@@ -158,11 +171,30 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
                   placeholder="value"
                   value={LPToken?.value}
                   onChange={(event) => {
+                    const LPTokenValue = event.target.value
                     const newLPToken = {
                       ...LPToken!,
-                      value: event.target.value,
+                      value: LPTokenValue,
                     }
                     setLPToken(newLPToken)
+
+                    const newPreviewPoolBalance = { ...previewPoolBalance }
+                    if (LPTokenValue === ``) {
+                      newPreviewPoolBalance.LPToken.value =
+                        poolBalance.LPToken.value
+                      setPreviewPoolBalance(newPreviewPoolBalance)
+                      return
+                    }
+
+                    newPreviewPoolBalance.LPToken.value =
+                      currentAMMTransactionType === `deposit`
+                        ? (
+                            Number(newPreviewPoolBalance.LPToken.value) +
+                            Number(LPTokenValue)
+                          ).toString()
+                        : Number(newPreviewPoolBalance.LPToken.value) -
+                          Number(LPTokenValue)
+                    setPreviewPoolBalance(newPreviewPoolBalance)
                   }}
                 />
               </InputGroup>
@@ -202,8 +234,29 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
                   placeholder="value"
                   value={Asset1?.value}
                   onChange={(event) => {
-                    const newAsset1 = { ...Asset1!, value: event.target.value }
+                    const asset1Value = event.target.value
+                    const newAsset1 = { ...Asset1!, value: asset1Value }
                     setAsset1(newAsset1)
+
+                    const newPreviewPoolBalance = { ...previewPoolBalance }
+                    if (asset1Value === ``) {
+                      newPreviewPoolBalance.Asset1.value =
+                        typeof poolBalance.Asset1 === `string`
+                          ? poolBalance.Asset1
+                          : poolBalance.Asset1.value
+                      setPreviewPoolBalance(newPreviewPoolBalance)
+                      return
+                    }
+
+                    newPreviewPoolBalance.Asset1.value =
+                      currentAMMTransactionType === `deposit`
+                        ? (
+                            Number(newPreviewPoolBalance.Asset1.value) +
+                            Number(asset1Value)
+                          ).toString()
+                        : Number(newPreviewPoolBalance.Asset1.value) -
+                          Number(asset1Value)
+                    setPreviewPoolBalance(newPreviewPoolBalance)
                   }}
                 />
               </InputGroup>
@@ -243,8 +296,29 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
                   placeholder="value"
                   value={Asset2?.value}
                   onChange={(event) => {
-                    const newAsset2 = { ...Asset2!, value: event.target.value }
+                    const asset2Value = event.target.value
+                    const newAsset2 = { ...Asset2!, value: asset2Value }
                     setAsset2(newAsset2)
+
+                    const newPreviewPoolBalance = { ...previewPoolBalance }
+                    if (asset2Value === ``) {
+                      newPreviewPoolBalance.Asset2.value =
+                        typeof poolBalance.Asset2 === `string`
+                          ? poolBalance.Asset2
+                          : poolBalance.Asset2.value
+                      setPreviewPoolBalance(newPreviewPoolBalance)
+                      return
+                    }
+
+                    newPreviewPoolBalance.Asset2.value =
+                      currentAMMTransactionType === `deposit`
+                        ? (
+                            Number(newPreviewPoolBalance.Asset2.value) +
+                            Number(asset2Value)
+                          ).toString()
+                        : Number(newPreviewPoolBalance.Asset2.value) -
+                          Number(asset2Value)
+                    setPreviewPoolBalance(newPreviewPoolBalance)
                   }}
                 />
               </InputGroup>
@@ -304,9 +378,9 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
               checked={transactionCombo === currentAMMTransactionCombination}
               value={transactionCombo}
               onChange={(event) => {
-                console.log(event.target.value)
                 // @ts-expect-error
                 setCurrentAMMTransactionCombination(event.target.value)
+                resetFormFields()
               }}
               label={formatTransactionCombo}
             />
@@ -335,7 +409,9 @@ export const ChangeLiquidityModal: React.FC<ChangeLiquidityModalProps> = ({
           <Col>{transactionCombinationNav()}</Col>
         </Row>
         {showForm()}
-        <ShowPool poolBalance={poolBalance} />
+        {previewPoolBalance != null && (
+          <ShowPool poolBalance={previewPoolBalance} />
+        )}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleCloseButtonClick}>
