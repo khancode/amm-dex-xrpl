@@ -1,20 +1,20 @@
 .header {
   margin-top: 1%;
   margin-bottom: 60px;
-}
 
-.headerRow {
-  align-items: center;
-}
+  .headerRow {
+    align-items: center;
+  }
 
-.screenRadios {
-  display: flex;
-  justify-content: center;
-  gap: 4%;
-}
+  .navHeader {
+    display: flex;
+    justify-content: center;
+    gap: 4%;
+  }
 
-.userInfo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  .userInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 }

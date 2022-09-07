@@ -1,17 +1,12 @@
-import React, {
-  ChangeEvent,
-  ReactElement,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import React, { ReactElement, useContext, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { UserContext } from './Page'
 import XRPLogo from '../../../static/images/XRPLogo.png'
 import './Header.scss'
+import { Nav } from 'react-bootstrap'
 
-const SCREENS = new Set<string>([`swap`, `pool`, `vote`, `charts`])
+const SCREENS = new Set<string>([`swap`, `pool`])
 const DEFAULT_SCREEN = `swap`
 
 export const Header: React.FC<{}> = () => {
@@ -28,58 +23,40 @@ export const Header: React.FC<{}> = () => {
     setCurrentScreen(getScreen)
   })
 
-  const createRadioButton = (screen: string): ReactElement => {
-    const onChange = (e: ChangeEvent<HTMLInputElement>): void => {
-      const newScreen = e.target.id.replace(`Radio`, ``)
-      setCurrentScreen(newScreen)
-      navigate(`/${newScreen}`)
-    }
-
-    const id = `${screen}Radio`
-    const isChecked = screen === currentScreen
+  const navHeader = (): ReactElement => {
     return (
-      <div key={id} className="">
-        <input
-          className="form-check-input"
-          type="radio"
-          name="flexRadioDefault"
-          id={id}
-          onChange={onChange}
-          checked={isChecked}
-        />
-        <label className="form-check-label" htmlFor={id}>
-          {screen}
-        </label>
-      </div>
-    )
-  }
-
-  const radioButtons = (): ReactElement => {
-    return (
-      <div className="screenRadios">
+      <Nav
+        className="navHeader"
+        variant="pills"
+        activeKey={currentScreen}
+        onSelect={(newScreen) => {
+          if (newScreen == null) {
+            throw Error(`newScreen is null`)
+          }
+          setCurrentScreen(newScreen)
+          navigate(`/${newScreen}`)
+        }}
+      >
         {Array.from(SCREENS).map((screen) => {
-          return createRadioButton(screen)
+          return (
+            <Nav.Item key={screen}>
+              <Nav.Link eventKey={screen}>{screen}</Nav.Link>
+            </Nav.Item>
+          )
         })}
-      </div>
+      </Nav>
     )
   }
 
   return (
     <div className="header container">
       <div className="row headerRow">
-        {/* TODO: XRPLswap logo */}
         <img src={XRPLogo} className="xrplSwapLogo col-1" />
-        {/* <div className="xrplSwapLogo col-3">XRPLswap logo</div> */}
 
-        {/* TODO: replace with an actual navigation header */}
-        <div className="col">{radioButtons()}</div>
+        <div className="col">{navHeader()}</div>
 
-        {/* <div>user:</div>
-        <div>{user != null && JSON.stringify(user, null, 4)}</div> */}
-
-        {/* NICE: add user avatar and dropdown list for more options */}
         <div className="userInfo col-2">
-          <div>{user?.user.username}</div>
+          {/* <div>{user?.user.username}</div> */}
           <div>{user?.user.wallet.address}</div>
         </div>
       </div>
