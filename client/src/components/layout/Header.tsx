@@ -4,13 +4,16 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { UserContext } from './Page'
 import XRPLogo from '../../../static/images/XRPLogo.png'
 import './Header.scss'
-import { Nav } from 'react-bootstrap'
+import { Container, Nav, Navbar } from 'react-bootstrap'
+import { getUserBalances } from '../../util/apiRequests'
+import { UserBalancesResponse } from '../../util/apiModels'
 
 const SCREENS = new Set<string>([`swap`, `pool`])
 const DEFAULT_SCREEN = `swap`
 
 export const Header: React.FC<{}> = () => {
-  const { user } = useContext(UserContext)
+  const [userBalances, setUserBalances] = useState<UserBalancesResponse>()
+  const { user, loading } = useContext(UserContext)
   const location = useLocation()
   const navigate = useNavigate()
   const [currentScreen, setCurrentScreen] = useState<string>()
@@ -23,10 +26,18 @@ export const Header: React.FC<{}> = () => {
     setCurrentScreen(getScreen)
   })
 
+  useEffect(() => {
+    if (!loading) {
+      getUserBalances(user.user.username).then((getUserBalancesResponse) => {
+        setUserBalances(getUserBalancesResponse)
+      })
+    }
+  }, [loading])
+
   const navHeader = (): ReactElement => {
     return (
       <Nav
-        className="navHeader"
+        className="navHeader col-8"
         variant="pills"
         activeKey={currentScreen}
         onSelect={(newScreen) => {
@@ -38,9 +49,13 @@ export const Header: React.FC<{}> = () => {
         }}
       >
         {Array.from(SCREENS).map((screen) => {
+          const screenCapitalized =
+            screen.charAt(0).toUpperCase() + screen.slice(1)
           return (
             <Nav.Item key={screen}>
-              <Nav.Link eventKey={screen}>{screen}</Nav.Link>
+              <Nav.Link eventKey={screen}>
+                <b>{screenCapitalized}</b>
+              </Nav.Link>
             </Nav.Item>
           )
         })}
@@ -48,18 +63,37 @@ export const Header: React.FC<{}> = () => {
     )
   }
 
+  const showXRPBalance = (): any => {
+    if (userBalances == null) {
+      return `Loading...`
+    }
+    const xrpBalance = userBalances.balances.find(
+      ({ currency, value }) => currency === `XRP`
+    )
+
+    if (xrpBalance == null) {
+      return `Invalid balance`
+    }
+
+    return `${xrpBalance.value} XRP`
+  }
+
   return (
     <div className="header container">
-      <div className="row headerRow">
-        <img src={XRPLogo} className="xrplSwapLogo col-1" />
+      <Navbar className="headerRow" expand="lg" variant="light" bg="light">
+        <Container>
+          <Navbar.Brand href="#home">
+            <img src={XRPLogo} className="xrplLogo col-1" />
+          </Navbar.Brand>
 
-        <div className="col">{navHeader()}</div>
+          {navHeader()}
 
-        <div className="userInfo col-2">
-          {/* <div>{user?.user.username}</div> */}
-          <div>{user?.user.wallet.address}</div>
-        </div>
-      </div>
+          <div className="userInfo">
+            <b>{showXRPBalance()}</b>
+            <div>{user?.user.wallet.address}</div>
+          </div>
+        </Container>
+      </Navbar>
     </div>
   )
 }

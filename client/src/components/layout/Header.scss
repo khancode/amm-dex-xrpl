@@ -4,17 +4,20 @@
 
   .headerRow {
     align-items: center;
-  }
 
-  .navHeader {
-    display: flex;
-    justify-content: center;
-    gap: 4%;
-  }
+    .xrplLogo {
+      width: 35px;
+      height: 35px;
+    }
 
-  .userInfo {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    .navHeader {
+      gap: 4%;
+    }
+
+    .userInfo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
   }
 }
